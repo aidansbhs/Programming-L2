@@ -17,21 +17,32 @@
 
         var playerXpos = 0;
         var playerYpos = 0;
-        const PLAYER_SIZE = 20;
-        var playerXspeed = 5;
+        const PLAYER_SIZE = 40;
+        var playerXspeed = 3.5;
         var playerYspeed = 5;
 
         var player2Xpos = 0;
         var player2Ypos = 0;
-        const PLAYER2_SIZE = 20;
-        var player2Xspeed = 5;
+        const PLAYER2_SIZE = 40;
+        var player2Xspeed = 3.5;
         var player2Yspeed = 5;
-        
+
+        var gravity = 5;
+        var gravity2 = 5;
+        var jumping = false;
+        var jumping2 = false;
+
         //ground variables
         var groundYpos = 0;
         var groundXpos = 0;
         var groundWidth = 0;
         var groundLength = 0;
+
+        var ballXpos = 0;
+        var ballYpos = 0;
+        var ballSize = 15;
+        var ballXspeed = 5;
+        var ballYspeed = 4;
 
         const LEFT_KEY = 37;
         const RIGHT_KEY = 39;
@@ -53,35 +64,88 @@
 
         var startingPos = true;
 
+        //        var ball = new Image();
+        //        ball.src = 'img/player.jpg';
+
         function mainloop() {
             colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
-            colorRect(playerXpos, playerYpos, PLAYER_SIZE, PLAYER_SIZE, 'red'); //player
-            colorRect(player2Xpos, player2Ypos, PLAYER2_SIZE, PLAYER2_SIZE, 'blue'); //player 2   
-            colorRect(groundXpos, groundYpos, groundLength, groundLength, 'green'); //ground line
 
-            playerMove();
-            player2Move();
-            
-            gameSetup();
-            
             if (startingPos) {
                 startPos();
                 startingPos = false;
             }
 
+            gameSetup();
+
+            drawGround();
+            drawBall(ballXpos, ballYpos, ballSize, 0);
+            drawPlayer();
+            drawPlayer2();
+
+            playerGravity();
+            playerGravity2();
+
+            playerMove();
+            player2Move();
+            playerJump();
+            player2Jump();
+            ballCollisions();
+
+            ballMove();
+
         }
-        
+
         function gameSetup() {
             groundLength = canvas.width;
             groundYpos = canvas.height - 80;
         } //end function
 
-        function startPos() {
+        function startPos() { //starting positions for game variables
             playerXpos = canvas.width / 7 - PLAYER_SIZE / 2;
-            playerYpos = canvas.height / 1.2 - PLAYER_SIZE / 2;
+            playerYpos = canvas.height / 1.225 - PLAYER_SIZE / 2;
             player2Xpos = canvas.width / 1.2 - PLAYER2_SIZE / 2;
-            player2Ypos = canvas.height / 1.2 - PLAYER2_SIZE / 2;
+            player2Ypos = canvas.height / 1.225 - PLAYER2_SIZE / 2;
+            ballXpos = canvas.width / 2;
+            ballYpos = canvas.height - 100;
         }
+
+        function ballMove() {
+            //            ballXpos += ballXspeed; //x speed
+            //            ballYpos += ballYspeed;
+
+            if (ballXpos > canvas.width - ballSize) { //right edge bounce
+                ballXspeed *= -1;
+            }
+            if (ballXpos < 0 + ballSize) { //left edge bounce
+                ballXspeed *= -1;
+            }
+            ballXpos += ballXspeed;
+        } //end of ballMove
+
+        function ballCollisions() {
+            if (ballXpos - ballSize <= playerXpos + PLAYER_SIZE && ballXpos + ballSize >= playerXpos && ballYpos <= playerYpos + PLAYER_SIZE && ballYpos + ballSize >= playerYpos) { //player1
+                console.log('working');
+
+                if (dKeyPressed && playerXpos < canvas.width - PLAYER_SIZE) {
+                    ballXspeed = playerXspeed + 2;
+                } else if (aKeyPressed && playerXpos > 0) {
+                    ballXspeed = playerXspeed + 2;
+                    ballXspeed *= -1;
+                } else {
+                    ballXspeed *= -1;
+                }
+            }
+            if(ballXpos - ballSize <= player2Xpos + PLAYER2_SIZE && ballXpos + ballSize >= player2Xpos && ballYpos <= player2Ypos + PLAYER2_SIZE && ballYpos + ballSize >= player2Ypos){
+                if(rightKeyPressed && player2Xpos < canvas.width - PLAYER2_SIZE){
+                    ballXspeed = player2Xspeed + 2;
+                } else if (leftKeyPressed && player2Xpos > 0){
+                    ballXspeed = player2Xspeed + 2;
+                    ballXspeed *= -1;
+                } else {
+                    ballXspeed *= -1;
+                }
+            }
+        } //end function
 
         function playerMove() {
             if (dKeyPressed && playerXpos < canvas.width - PLAYER_SIZE) {
@@ -90,28 +154,57 @@
             if (aKeyPressed && playerXpos > 0) {
                 playerXpos -= playerXspeed; // x move
             }
-//            if (wKeyPressed && playerYpos > 0) {
-//                playerYpos -= playerYspeed; // y move
-//            }
-//            if (sKeyPressed && playerYpos < canvas.height - PLAYER_SIZE) {
-//                playerYpos += playerYspeed; // y move
-//            }
         } //end function
 
         function player2Move() {
-           if (rightKeyPressed && player2Xpos < canvas.width - PLAYER2_SIZE) {
+            if (rightKeyPressed && player2Xpos < canvas.width - PLAYER2_SIZE) {
                 player2Xpos += player2Xspeed; // x move
             }
             if (leftKeyPressed && player2Xpos > 0) {
                 player2Xpos -= player2Xspeed; // x move
             }
-//            if (upKeyPressed && player2Ypos > 0) {
-//                player2Ypos -= player2Yspeed; // y move
-//            }
-//            if (downKeyPressed && player2Ypos < canvas.height - PLAYER2_SIZE) {
-//                player2Ypos += player2Yspeed; // y move
-//            }
         }
+
+        function playerGravity() {
+            if (gravity > -60 && playerYpos < groundYpos - PLAYER_SIZE) {
+                playerYpos += gravity / 5;
+                gravity += 2;
+            }
+        } //end of gravity
+
+        function playerGravity2() {
+            if (gravity2 > -60 && player2Ypos < groundYpos - PLAYER2_SIZE) {
+                player2Ypos += gravity2 / 5;
+                gravity2 += 2;
+            }
+        } //end of gravity2
+
+        function playerJump() {
+            if (wKeyPressed && jumping == false) {
+                jumping = true;
+                gravity = -30; //jump speed
+                playerYpos += gravity;
+            }
+            if (playerYpos + PLAYER_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the ground line
+                playerYSpeed = 0;
+                playerYpos = groundYpos - PLAYER_SIZE; //to stop player sinking through the ground
+                jumping = false;
+            }
+        } //end of playerJump
+
+        function player2Jump() {
+            if (upKeyPressed && jumping2 == false) {
+                jumping2 = true;
+                gravity2 = -30; //jump force speed
+                player2Ypos += gravity2;
+            }
+            if (player2Ypos + PLAYER2_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the horizon line
+                player2YSpeed = 0;
+                player2Ypos = groundYpos - PLAYER2_SIZE; //to stop player sinking through horizonYpos
+                jumping2 = false;
+            }
+        } //end of player2Jump
+
 
         function keyPressed(evt) {
             if (evt.keyCode == LEFT_KEY) {
@@ -173,11 +266,30 @@
             canvasContext.fillStyle = c;
             canvasContext.fillRect(x, y, w, h);
         }
-        
-        function groundDraw(x, y, w, h, c){
-            canvasContext.fillStyle = c;
-            canvasContext.fillRect(x, y, w, h);
-        }//end function
+
+        function drawPlayer(x, y, w, h, c) {
+            canvasContext.fillStyle = 'red';
+            canvasContext.fillRect(playerXpos, playerYpos, PLAYER_SIZE, PLAYER_SIZE);
+        }
+
+        function drawPlayer2(x, y, w, h, c) {
+            canvasContext.fillStyle = 'blue';
+            canvasContext.fillRect(player2Xpos, player2Ypos, PLAYER2_SIZE, PLAYER2_SIZE);
+        }
+
+        function drawGround(x, y, w, h, c) {
+            canvasContext.fillStyle = 'green';
+            canvasContext.fillRect(groundXpos, groundYpos, groundLength, groundLength);
+        } //end function
+
+        function drawBall(x, y, w, h, c) {
+            canvasContext.beginPath();
+            //            canvasContext.arc(canvas.width / 2, canvas.height - 100, 15, 0, 2 * Math.PI);
+            canvasContext.arc(x, y, w, h, 2 * Math.PI);
+            canvasContext.fillStyle = 'white';
+            canvasContext.fill();
+            canvasContext.closePath();
+        }
 
     </script>
 </body>
