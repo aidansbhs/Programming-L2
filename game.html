@@ -3,34 +3,54 @@
 <body>
     <canvas id="gameCanvas" width="800" height="575"></canvas>
     <script>
-        var canvas, canvasContext;
+        var canvas, ctx;
+
+        var ball;
 
         window.onload = function() {
             canvas = document.getElementById('gameCanvas');
-            canvasContext = canvas.getContext('2d');
+            ctx = canvas.getContext('2d');
 
             setInterval(mainloop, 1000 / 50);
+
+            ball = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: 15,
+                status: 0
+            }; //ball size and starting position
 
             document.addEventListener('keydown', keyPressed);
             document.addEventListener('keyup', keyReleased);
         }
 
+        //player movement
+
+        //player 1
         var playerXpos = 0;
         var playerYpos = 0;
         const PLAYER_SIZE = 40;
         var playerXspeed = 3.5;
         var playerYspeed = 5;
 
+        //player 2
         var player2Xpos = 0;
         var player2Ypos = 0;
         const PLAYER2_SIZE = 40;
         var player2Xspeed = 3.5;
         var player2Yspeed = 5;
 
-        var gravity = 5;
-        var gravity2 = 5;
+        //physics
+        var gravity = 0.1;
+        var ballGravity = 0.1;
+        var gravity2 = 0.1;
+        var bounce = 0.7;
+        var friction = 0.15;
         var jumping = false;
         var jumping2 = false;
+
+        var playerCollision = false;
+        var playerCollision2 = false;
 
         //ground variables
         var groundYpos = 0;
@@ -38,21 +58,13 @@
         var groundWidth = 0;
         var groundLength = 0;
 
-        var ballXpos = 0;
-        var ballYpos = 0;
-        var ballSize = 15;
+        //ball speeds
         var ballXspeed = 5;
-        var ballYspeed = 4;
+        var ballYspeed = 1;
 
-        const LEFT_KEY = 37;
-        const RIGHT_KEY = 39;
-        const UP_KEY = 38;
-        const DOWN_KEY = 40;
-        var leftKeyPressed = false;
-        var rightKeyPressed = false;
-        var upKeyPressed = false;
-        var downKeyPressed = false;
+        //controls for players
 
+        //player 1
         const A_KEY = 65;
         const D_KEY = 68;
         const W_KEY = 87;
@@ -62,10 +74,17 @@
         var wKeyPressed = false;
         var sKeyPressed = false
 
-        var startingPos = true;
+        //player 2
+        const LEFT_KEY = 37;
+        const RIGHT_KEY = 39;
+        const UP_KEY = 38;
+        const DOWN_KEY = 40;
+        var leftKeyPressed = false;
+        var rightKeyPressed = false;
+        var upKeyPressed = false;
+        var downKeyPressed = false;
 
-        //        var ball = new Image();
-        //        ball.src = 'img/player.jpg';
+        var startingPos = true;
 
         function mainloop() {
             colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
@@ -78,7 +97,7 @@
             gameSetup();
 
             drawGround();
-            drawBall(ballXpos, ballYpos, ballSize, 0);
+            drawBall();
             drawPlayer();
             drawPlayer2();
 
@@ -89,11 +108,12 @@
             player2Move();
             playerJump();
             player2Jump();
-            ballCollisions();
 
+            ballCollisions();
             ballMove();
 
-        }
+            console.log(gravity);
+        } //end of mainloop
 
         function gameSetup() {
             groundLength = canvas.width;
@@ -105,45 +125,82 @@
             playerYpos = canvas.height / 1.225 - PLAYER_SIZE / 2;
             player2Xpos = canvas.width / 1.2 - PLAYER2_SIZE / 2;
             player2Ypos = canvas.height / 1.225 - PLAYER2_SIZE / 2;
-            ballXpos = canvas.width / 2;
-            ballYpos = canvas.height - 100;
-        }
+        } //end of function
 
         function ballMove() {
-            //            ballXpos += ballXspeed; //x speed
-            //            ballYpos += ballYspeed;
+            ball.x += ballXspeed;
+            ball.y += ballYspeed;
+            ballYspeed += ballGravity;
 
-            if (ballXpos > canvas.width - ballSize) { //right edge bounce
+            if (ball.y + ball.radius > groundYpos) { //if the ball is greater than the ground floor
+                ball.y = groundYpos - ball.radius; //reposition on the ground
+                ballYspeed *= -bounce; //bounce the ball
+
+                if (ballYspeed < 0 && ballYspeed > -2.1) { //do this otherwise, ball never stops bouncing
+                    ballYspeed = 0;
+                }
+                ballFriction(); //apply friction
+            }
+            if (ball.x > canvas.width - ball.radius && ballXspeed > 0) { //right edge bounce
                 ballXspeed *= -1;
             }
-            if (ballXpos < 0 + ballSize) { //left edge bounce
+            if (ball.x < 0 + ball.radius && ballXspeed < 0) { //left edge bounce
                 ballXspeed *= -1;
             }
-            ballXpos += ballXspeed;
         } //end of ballMove
 
-        function ballCollisions() {
-            if (ballXpos - ballSize <= playerXpos + PLAYER_SIZE && ballXpos + ballSize >= playerXpos && ballYpos <= playerYpos + PLAYER_SIZE && ballYpos + ballSize >= playerYpos) { //player1
-                console.log('working');
-
-                if (dKeyPressed && playerXpos < canvas.width - PLAYER_SIZE) {
-                    ballXspeed = playerXspeed + 2;
-                } else if (aKeyPressed && playerXpos > 0) {
-                    ballXspeed = playerXspeed + 2;
-                    ballXspeed *= -1;
-                } else {
-                    ballXspeed *= -1;
+        function ballFriction() {
+            if (Math.abs(ballXspeed) > 0.2) { //apply friction if ball speed is bigger than this
+                if (ballXspeed > 0) {
+                    ballXspeed = ballXspeed - friction;
+                }
+                if (ballXspeed < 0) {
+                    ballXspeed = ballXspeed + friction
                 }
             }
-            if(ballXpos - ballSize <= player2Xpos + PLAYER2_SIZE && ballXpos + ballSize >= player2Xpos && ballYpos <= player2Ypos + PLAYER2_SIZE && ballYpos + ballSize >= player2Ypos){
-                if(rightKeyPressed && player2Xpos < canvas.width - PLAYER2_SIZE){
-                    ballXspeed = player2Xspeed + 2;
-                } else if (leftKeyPressed && player2Xpos > 0){
-                    ballXspeed = player2Xspeed + 2;
-                    ballXspeed *= -1;
-                } else {
-                    ballXspeed *= -1;
+        } //end of ballFriction
+
+        function ballCollisions() {
+            if (ball.x - ball.radius <= playerXpos + PLAYER_SIZE && ball.x + ball.radius >= playerXpos && ball.y <= playerYpos + PLAYER_SIZE && ball.y + ball.radius >= playerYpos) { //player1 hitbox with ball
+                //                if (playerCollision == false && dKeyPressed && playerXpos < canvas.width - PLAYER_SIZE) {
+                //                    ballXspeed = playerXspeed + 2;
+                //                } else if (playerCollision == false && aKeyPressed && playerXpos > 0) {
+                //                    ballXspeed = playerXspeed + 2;
+                //                    ballXspeed *= -1;
+                //                }
+                //                 else {
+                //                    ballXspeed *= -1;
+                //                }
+                if (playerCollision == false) {
+                    if (ball.x < playerXpos + PLAYER_SIZE / 2) {
+                        ballXspeed = -5;
+                    }
+                    if (ball.x >= playerXpos + PLAYER_SIZE / 2) {
+                        ballXspeed = 5;
+                    } //if ball inside player it will go outwards in the right direction
                 }
+                ballYspeed = gravity / 5 - 1;
+                playerCollision = true;
+                playerCollision2 = false;
+            } else {
+                playerCollision = false;
+            }
+            console.log(playerCollision);
+
+            if (ball.x - ball.radius <= player2Xpos + PLAYER2_SIZE && ball.x + ball.radius >= player2Xpos && ball.y <= player2Ypos + PLAYER2_SIZE && ball.y + ball.radius >= player2Ypos) { //player 2
+                if (playerCollision2 == false) {
+                    if (ball.x < player2Xpos + PLAYER2_SIZE / 2) {
+                        ballXspeed = -5;
+                    }
+                    if (ball.x >= player2Xpos + PLAYER2_SIZE / 2) {
+                        ballXspeed = 5;
+                    } //if ball inside player it will go outwards in the right direction
+                }
+                ballYspeed = gravity2 / 5 - 1;
+                playerCollision2 = true;
+                playerCollision = false;
+            } else {
+                playerCollision2 = false;
             }
         } //end function
 
@@ -163,7 +220,7 @@
             if (leftKeyPressed && player2Xpos > 0) {
                 player2Xpos -= player2Xspeed; // x move
             }
-        }
+        } //end of player2Move
 
         function playerGravity() {
             if (gravity > -60 && playerYpos < groundYpos - PLAYER_SIZE) {
@@ -183,12 +240,13 @@
             if (wKeyPressed && jumping == false) {
                 jumping = true;
                 gravity = -30; //jump speed
-                playerYpos += gravity;
+                playerYpos -= 10;
             }
             if (playerYpos + PLAYER_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the ground line
                 playerYSpeed = 0;
                 playerYpos = groundYpos - PLAYER_SIZE; //to stop player sinking through the ground
                 jumping = false;
+                gravity = 0;
             }
         } //end of playerJump
 
@@ -202,6 +260,7 @@
                 player2YSpeed = 0;
                 player2Ypos = groundYpos - PLAYER2_SIZE; //to stop player sinking through horizonYpos
                 jumping2 = false;
+                gravity2 = 0;
             }
         } //end of player2Jump
 
@@ -263,32 +322,31 @@
         } //end function
 
         function colorRect(x, y, w, h, c) {
-            canvasContext.fillStyle = c;
-            canvasContext.fillRect(x, y, w, h);
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, w, h);
         }
 
         function drawPlayer(x, y, w, h, c) {
-            canvasContext.fillStyle = 'red';
-            canvasContext.fillRect(playerXpos, playerYpos, PLAYER_SIZE, PLAYER_SIZE);
+            ctx.fillStyle = 'red';
+            ctx.fillRect(playerXpos, playerYpos, PLAYER_SIZE, PLAYER_SIZE);
         }
 
         function drawPlayer2(x, y, w, h, c) {
-            canvasContext.fillStyle = 'blue';
-            canvasContext.fillRect(player2Xpos, player2Ypos, PLAYER2_SIZE, PLAYER2_SIZE);
+            ctx.fillStyle = 'blue';
+            ctx.fillRect(player2Xpos, player2Ypos, PLAYER2_SIZE, PLAYER2_SIZE);
         }
 
         function drawGround(x, y, w, h, c) {
-            canvasContext.fillStyle = 'green';
-            canvasContext.fillRect(groundXpos, groundYpos, groundLength, groundLength);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(groundXpos, groundYpos, groundLength, groundLength);
         } //end function
 
         function drawBall(x, y, w, h, c) {
-            canvasContext.beginPath();
-            //            canvasContext.arc(canvas.width / 2, canvas.height - 100, 15, 0, 2 * Math.PI);
-            canvasContext.arc(x, y, w, h, 2 * Math.PI);
-            canvasContext.fillStyle = 'white';
-            canvasContext.fill();
-            canvasContext.closePath();
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.closePath();
         }
 
     </script>
