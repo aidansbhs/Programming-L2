@@ -2,6 +2,21 @@
 
 <html>
 
+<body>
+    <!--
+    <div class="menuScreenButtons">
+        <button class="button1" id="singlePlayer" onclick="menuButtons()">
+        </button>
+        <button class="button2" id="2Player" onclick="menuButtons()">
+        </button>
+        <button class="button3" id="Instructions" onclick="menuButtons()">
+        </button>
+-->
+
+    <!--    </div>-->
+
+</body>
+
 </html>
 
 <body>
@@ -15,6 +30,43 @@
             display: block;
         }
 
+        /*
+        .button1 {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 43.4vw;
+            margin-right: auto;
+            margin-top: 21.3vh;
+            display: block;
+            width: 12vw;
+            height: 5vh;
+            position: absolute;
+        }
+
+        .button2 {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 43.4vw;
+            margin-right: auto;
+            margin-top: 29vh;
+            width: 12vw;
+            height: 5vh;
+            position: absolute;
+
+        }
+
+        .button3 {
+            padding-left: 0;
+            padding-right: 0;
+            margin-left: 43.4vw;
+            margin-right: auto;
+            margin-top: 37vh;
+            width: 12vw;
+            height: 5vh;
+            position: absolute;
+        }
+*/
+
     </style>
 
     <canvas id="gameCanvas" width="800" height="575"></canvas>
@@ -26,8 +78,8 @@
         window.onload = function() {
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
-            
-         imageAssets = loadImages();
+
+            imageAssets = loadImages();
 
             setInterval(mainloop, 1000 / 50);
 
@@ -38,9 +90,20 @@
                 status: 0
             }; //ball size and starting position
 
+            gameStart;
+
             document.addEventListener('keydown', keyPressed);
             document.addEventListener('keyup', keyReleased);
+            canvas.addEventListener('mousemove', function(evt) {
+
+                var mousePos = mouseAction(evt);
+                mouseX = mousePos.x;
+                mouseY = mousePos.y;
+//                console.log(mouseX);
+//                console.log(mouseY);
+            });
         }
+
 
         //player movement
 
@@ -104,24 +167,26 @@
         var upKeyPressed = false;
         var downKeyPressed = false;
 
+        //game variables
+        var mouseX, mouseY;
         var startingPos = true;
         var mainMenu = false;
         var gameStart = true;
 
         function mainloop() {
             colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
-//            drawMenuScreen(imageAssets.menuScreen,0,0, canvas.width, canvas.height);
+            drawMenuScreen(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
 
             if (startingPos) { //starting position
                 startPos();
                 startingPos = false;
             }
-//            
-//            if(gameStart == true){
-//                drawMenuScreen();
-//            } else {
-//                gameStart = false;
-//            }
+
+            if (gameStart == true) {
+                //                drawMenuScreen();
+            } else {
+                gameStart = false;
+            }
 
             gameSetup();
 
@@ -129,7 +194,6 @@
             drawBall();
             drawPlayer();
             drawPlayer2();
-//            drawMenuScreen();
 
             playerGravity();
             player2Gravity();
@@ -149,21 +213,27 @@
         function gameSetup() {
             groundLength = canvas.width;
             groundYpos = canvas.height - 80;
-        } //end function
+        } //end gameSetup
+
+        function menuButtons() {
+            if(mouseX == 395 && mouseY == 230){
+            console.log('change');
+        }
+        }
 
         function startPos() { //starting positions for game variables
             playerXpos = canvas.width / 7 - PLAYER_SIZE / 2;
             playerYpos = canvas.height / 1.225 - PLAYER_SIZE / 2;
             player2Xpos = canvas.width / 1.2 - PLAYER2_SIZE / 2;
             player2Ypos = canvas.height / 1.225 - PLAYER2_SIZE / 2;
-        } //end of function
-        
+        } //end of startPos
+
         function loadImages() {
             imgs = [];
             imgs.menuScreen = new Image();
             imgs.menuScreen.src = 'img/menuScreen.png';
             return imgs;
-        }
+        } // end of loadImages
 
         function ballMove() {
             ball.x += ballXspeed; //x speed
@@ -243,17 +313,13 @@
                 player2Collision = false;
             } //end of player 2 collisions with ball
 
-        } //end function
+        } //end of ball Collisions
 
         function playerCollisions() {
             if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && playerYpos + PLAYER_SIZE >= player2Ypos) {
-
                 playerCollision = true;
             }
-
             if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && player2Ypos + PLAYER2_SIZE >= playerYpos) {
-
-
                 player2Collision = true;
             }
         } //end of playerCollisions
@@ -346,7 +412,7 @@
             }
             if (evt.keyCode == DOWN_KEY) {
                 downKeyPressed = true;
-            }
+            } //player 2
 
             if (evt.keyCode == A_KEY) {
                 aKeyPressed = true;
@@ -359,7 +425,7 @@
             }
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = true;
-            }
+            } //player 1
         } //end function
 
         function keyReleased(evt) {
@@ -374,7 +440,7 @@
             }
             if (evt.keyCode == DOWN_KEY) {
                 downKeyPressed = false;
-            }
+            } //player 2
 
             if (evt.keyCode == A_KEY) {
                 aKeyPressed = false;
@@ -387,8 +453,21 @@
             }
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = false;
+            } //player 1
+        } //end of keyReleased
+
+        function mouseAction(evt) {
+            var rect = canvas.getBoundingClientRect();
+            var root = document.documentElement;
+
+            mouseX = evt.clientX - rect.left - root.scrollLeft;
+            mouseY = evt.clientY - rect.top - root.scrollTop;
+
+            return {
+                x: mouseX,
+                y: mouseY
             }
-        } //end function
+        } //end of mouseAction
 
         function colorRect(x, y, w, h, c) {
             ctx.fillStyle = c;
@@ -403,7 +482,7 @@
         function drawPlayer2(x, y, w, h, c) {
             ctx.fillStyle = 'blue';
             ctx.fillRect(player2Xpos, player2Ypos, PLAYER2_SIZE, PLAYER2_SIZE);
-        } //end of function drawPlayer2
+        } //end of drawPlayer2
 
         function drawGround(x, y, w, h, c) {
             ctx.fillStyle = 'green';
@@ -417,10 +496,10 @@
             ctx.fill();
             ctx.closePath();
         } //end of drawBall
-        
-//        function drawMenuScreen(src,x,y,w,h){
-//            ctx.drawImage(src,x,y,w,h);
-//        }
+
+        function drawMenuScreen(src, x, y, w, h) {
+            ctx.drawImage(src, x, y, w, h);
+        } //end of drawMenuScreen
 
     </script>
 
