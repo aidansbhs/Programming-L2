@@ -2,21 +2,6 @@
 
 <html>
 
-<body>
-    <!--
-    <div class="menuScreenButtons">
-        <button class="button1" id="singlePlayer" onclick="menuButtons()">
-        </button>
-        <button class="button2" id="2Player" onclick="menuButtons()">
-        </button>
-        <button class="button3" id="Instructions" onclick="menuButtons()">
-        </button>
--->
-
-    <!--    </div>-->
-
-</body>
-
 </html>
 
 <body>
@@ -29,43 +14,6 @@
             margin-top: 15vh;
             display: block;
         }
-
-        /*
-        .button1 {
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: 43.4vw;
-            margin-right: auto;
-            margin-top: 21.3vh;
-            display: block;
-            width: 12vw;
-            height: 5vh;
-            position: absolute;
-        }
-
-        .button2 {
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: 43.4vw;
-            margin-right: auto;
-            margin-top: 29vh;
-            width: 12vw;
-            height: 5vh;
-            position: absolute;
-
-        }
-
-        .button3 {
-            padding-left: 0;
-            padding-right: 0;
-            margin-left: 43.4vw;
-            margin-right: auto;
-            margin-top: 37vh;
-            width: 12vw;
-            height: 5vh;
-            position: absolute;
-        }
-*/
 
     </style>
 
@@ -99,8 +47,8 @@
                 var mousePos = mouseAction(evt);
                 mouseX = mousePos.x;
                 mouseY = mousePos.y;
-//                console.log(mouseX);
-//                console.log(mouseY);
+                //                                console.log(mouseX);
+                //                                console.log(mouseY);
             });
         }
 
@@ -173,6 +121,20 @@
         var mainMenu = false;
         var gameStart = true;
 
+        // menu buttons
+        var buttonXposLeft = 283.5;
+        var buttonXposRight = 508;
+
+        var buttonYposTop = 206.6;
+        var buttonYposBot = 254;
+
+        var button2YposTop = 282.6;
+        var button2YposBot = 330;
+
+        var button3YposTop = 358.6;
+        var button3YposBot = 406;
+
+
         function mainloop() {
             colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
             drawMenuScreen(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
@@ -182,13 +144,13 @@
                 startingPos = false;
             }
 
-            if (gameStart == true) {
-                //                drawMenuScreen();
-            } else {
-                gameStart = false;
-            }
+//            if (gameStart) {
+//                //                drawMenuScreen();
+//                gameStart = false;
+//            }
 
             gameSetup();
+            menuButtons();
 
             drawGround();
             drawBall();
@@ -216,10 +178,19 @@
         } //end gameSetup
 
         function menuButtons() {
-            if(mouseX == 395 && mouseY == 230){
-            console.log('change');
-        }
-        }
+            if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= buttonYposTop && mouseY <= buttonYposBot) { // button 1
+                console.log('change');
+                hoverButton1();
+            }
+            if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button2YposTop && mouseY <= button2YposBot) { // button 2
+                console.log('change');
+                hoverButton2();
+            }
+            if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button3YposTop && mouseY <= button3YposBot) { // button 3
+                console.log('change');
+                hoverButton3();
+            }
+        } //end of menuButtons
 
         function startPos() { //starting positions for game variables
             playerXpos = canvas.width / 7 - PLAYER_SIZE / 2;
@@ -426,7 +397,7 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = true;
             } //player 1
-        } //end function
+        } //end of keyPressed
 
         function keyReleased(evt) {
             if (evt.keyCode == LEFT_KEY) {
@@ -501,6 +472,17 @@
             ctx.drawImage(src, x, y, w, h);
         } //end of drawMenuScreen
 
-    </script>
+        function hoverButton1(x, y, w, h, c) {
+            colorRect(buttonXposLeft, buttonYposTop, (buttonXposRight - buttonXposLeft), (buttonYposBot - buttonYposTop), 'rgb(0,0,0,0.2)');
+        } // end of hoverButtons
+        
+        function hoverButton2(x, y, w, h, c) {
+            colorRect(buttonXposLeft, button2YposTop, (buttonXposRight - buttonXposLeft), (button2YposBot - button2YposTop), 'rgb(0,0,0,0.2)');
+        } // end of hoverButtons
+        
+        function hoverButton3(x, y, w, h, c) {
+            colorRect(buttonXposLeft, button3YposTop, (buttonXposRight - buttonXposLeft), (button3YposBot - button3YposTop), 'rgb(0,0,0,0.2)');
+        } // end of hoverButtons
 
+    </script>
 </body>
