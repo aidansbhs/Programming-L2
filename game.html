@@ -42,8 +42,8 @@
 
             document.addEventListener('keydown', keyPressed);
             document.addEventListener('keyup', keyReleased);
-            canvas.addEventListener('mousemove', function(evt) {
 
+            canvas.addEventListener('mousemove', function(evt) { //mouse code
                 var mousePos = mouseAction(evt);
                 mouseX = mousePos.x;
                 mouseY = mousePos.y;
@@ -117,11 +117,15 @@
 
         //game variables
         var mouseX, mouseY;
+        var mouseDown = 0;
+        var mouseClicked = false;
         var startingPos = true;
         var mainMenu = false;
         var gameStart = true;
 
         // menu buttons
+
+        //coordinates
         var buttonXposLeft = 283.5;
         var buttonXposRight = 508;
 
@@ -137,17 +141,17 @@
 
         function mainloop() {
             colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
-            drawMenuScreen(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
+            drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
 
             if (startingPos) { //starting position
                 startPos();
                 startingPos = false;
             }
 
-//            if (gameStart) {
-//                //                drawMenuScreen();
-//                gameStart = false;
-//            }
+            //            if (gameStart) {
+            //                //                drawImage();
+            //                gameStart = false;
+            //            }
 
             gameSetup();
             menuButtons();
@@ -170,6 +174,7 @@
             ballCollisions();
             ballMove();
 
+
         } //end of mainloop
 
         function gameSetup() {
@@ -179,16 +184,26 @@
 
         function menuButtons() {
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= buttonYposTop && mouseY <= buttonYposBot) { // button 1
-                console.log('change');
                 hoverButton1();
+                if (mouseDown) {
+                    console.log('clicking');
+                    drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+                }
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button2YposTop && mouseY <= button2YposBot) { // button 2
-                console.log('change');
                 hoverButton2();
+                if (mouseDown && mouseClicked == false) {
+                    console.log('clicking');
+                    drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+                    mouseClicked = true;
+                }
+                mouseClicked = false;
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button3YposTop && mouseY <= button3YposBot) { // button 3
-                console.log('change');
                 hoverButton3();
+                if (mouseDown) {
+                    console.log('clicking');
+                }
             }
         } //end of menuButtons
 
@@ -203,6 +218,8 @@
             imgs = [];
             imgs.menuScreen = new Image();
             imgs.menuScreen.src = 'img/menuScreen.png';
+            imgs.twoPlayerSelection = new Image();
+            imgs.twoPlayerSelection.src = 'img/start.png';
             return imgs;
         } // end of loadImages
 
@@ -233,9 +250,14 @@
                 if (ballXspeed > 0) {
                     ballXspeed = ballXspeed - friction;
                 }
+                //                } else if(Math.abs(ballXspeed) < 1.5){
+                //                    friction = 0.5;
+                //                    ballXspeed = ballXspeed - friction;
+                //                }
                 if (ballXspeed < 0) {
                     ballXspeed = ballXspeed + friction //*** fix this 
                 }
+                //                console.log(ballXspeed);
             }
         } //end of ballFriction
 
@@ -262,7 +284,7 @@
                 playerCollision = false;
             } //end of player 1 collisions with ball
 
-            if (ball.x - ball.radius <= player2Xpos + PLAYER2_SIZE && ball.x + ball.radius >= player2Xpos && ball.y <= player2Ypos + PLAYER2_SIZE && ball.y + ball.radius >= player2Ypos) { //player 2
+            if (ball.x - ball.radius <= player2Xpos + PLAYER2_SIZE && ball.x + ball.radius >= player2Xpos && ball.y <= player2Ypos + PLAYER2_SIZE && ball.y + ball.radius >= player2Ypos) { //player 2 hitbox when it touches ball
 
                 if (player2Collision == false) {
 
@@ -277,7 +299,7 @@
                         } //if ball inside player it will go outwards in the right direction
                     }
                 }
-                ballYspeed = gravity2 / 5 - 1;
+                ballYspeed = gravity2 / 5 - 1; //how high the ball goes when player 2 hits it in the y direction
                 player2Collision = true;
                 playerCollision = false;
             } else {
@@ -427,7 +449,7 @@
             } //player 1
         } //end of keyReleased
 
-        function mouseAction(evt) {
+        function mouseAction(evt) { //mouse code
             var rect = canvas.getBoundingClientRect();
             var root = document.documentElement;
 
@@ -439,6 +461,13 @@
                 y: mouseY
             }
         } //end of mouseAction
+
+        document.body.onmousedown = function() {
+            ++mouseDown;
+        }
+        document.body.onmouseup = function() {
+            --mouseDown;
+        }
 
         function colorRect(x, y, w, h, c) {
             ctx.fillStyle = c;
@@ -468,21 +497,21 @@
             ctx.closePath();
         } //end of drawBall
 
-        function drawMenuScreen(src, x, y, w, h) {
+        function drawImage(src, x, y, w, h) {
             ctx.drawImage(src, x, y, w, h);
-        } //end of drawMenuScreen
+        } //end of drawImage
 
         function hoverButton1(x, y, w, h, c) {
             colorRect(buttonXposLeft, buttonYposTop, (buttonXposRight - buttonXposLeft), (buttonYposBot - buttonYposTop), 'rgb(0,0,0,0.2)');
-        } // end of hoverButtons
-        
+        } // end of hoverButton1
+
         function hoverButton2(x, y, w, h, c) {
             colorRect(buttonXposLeft, button2YposTop, (buttonXposRight - buttonXposLeft), (button2YposBot - button2YposTop), 'rgb(0,0,0,0.2)');
-        } // end of hoverButtons
-        
+        } // end of hoverButtons2
+
         function hoverButton3(x, y, w, h, c) {
             colorRect(buttonXposLeft, button3YposTop, (buttonXposRight - buttonXposLeft), (button3YposBot - button3YposTop), 'rgb(0,0,0,0.2)');
-        } // end of hoverButtons
+        } // end of hoverButton3
 
     </script>
 </body>
