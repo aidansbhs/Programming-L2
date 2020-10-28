@@ -38,20 +38,17 @@
                 status: 0
             }; //ball size and starting position
 
-            gameStart;
-
             document.addEventListener('keydown', keyPressed);
             document.addEventListener('keyup', keyReleased);
 
-            canvas.addEventListener('mousemove', function(evt) { //mouse code
+            document.addEventListener('mousemove', function(evt) { //mouse code
                 var mousePos = mouseAction(evt);
                 mouseX = mousePos.x;
                 mouseY = mousePos.y;
-                //                                console.log(mouseX);
-                //                                console.log(mouseY);
+                //                console.log(mouseX);
+                //                console.log(mouseY);
             });
         }
-
 
         //player movement
 
@@ -118,63 +115,105 @@
         //game variables
         var mouseX, mouseY;
         var mouseDown = 0;
-        var mouseClicked = false;
+        var mouseUp = 1;
+        //        var mouseClicked = false;
         var startingPos = true;
-        var mainMenu = false;
         var gameStart = true;
 
         // menu buttons
 
+        var mainMenu = true;
+        var singePlayerSelect = false;
+        var twoPlayerSelect = false;
+        var instructionsSelect = false;
+
         //coordinates
+
+        //button 1-3 x
         var buttonXposLeft = 283.5;
         var buttonXposRight = 508;
 
+        //button 1 y
         var buttonYposTop = 206.6;
         var buttonYposBot = 254;
 
+        //button 2 y
         var button2YposTop = 282.6;
         var button2YposBot = 330;
 
+        //button 3 y
         var button3YposTop = 358.6;
         var button3YposBot = 406;
 
+        //start button
+        var startButtonLeft = 307.5;
+        var startButtonRight = 465.5;
+
+        var startButtonTop = 405.6;
+        var startButtonBot = 445.5;
 
         function mainloop() {
-            colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
-            drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
+            if (mainMenu == false) {
+                if (gameStart == true) {
 
-            if (startingPos) { //starting position
-                startPos();
-                startingPos = false;
+
+                    colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
+
+                    if (startingPos) { //starting position
+                        startPos();
+                        startingPos = false;
+                    }
+
+                    gameSetup();
+
+                    drawGround();
+                    drawBall();
+                    drawPlayer();
+                    drawPlayer2();
+
+                    playerGravity();
+                    player2Gravity();
+
+                    playerCollisions();
+
+                    playerMove();
+                    player2Move();
+                    playerJump();
+                    player2Jump();
+
+                    ballCollisions();
+                    ballMove();
+
+                }
+            } else {
+                drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height); //draws the menu screen
+                menuButtons(); //allows for menu buttons to be interacted with
+
+                if (singePlayerSelect == true) { //display screen for single play select if it is true inside the menu buttons function
+                    drawImage(imageAssets.temporaryStart, 0, 0, canvas.width, canvas.height);
+                    twoPlayerSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
+                    instructionsSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
+                    if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
+                        hoverStartButton();
+                        if (mouseDown) {
+                            mainMenu = false;
+                            gameStart = true;
+                        }
+                    }
+                }
+                if (twoPlayerSelect == true) {  //display screen for two player select if it is true inside the menuButtons function
+                    drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+                    singePlayerSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
+                    instructionsSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
+                    if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
+                        hoverStartButton();
+                        if (mouseDown) {
+                            mainMenu = false;
+                            gameStart = true;
+                        }
+                    }
+                }
             }
-
-            //            if (gameStart) {
-            //                //                drawImage();
-            //                gameStart = false;
-            //            }
-
-            gameSetup();
-            menuButtons();
-
-            drawGround();
-            drawBall();
-            drawPlayer();
-            drawPlayer2();
-
-            playerGravity();
-            player2Gravity();
-
-            playerCollisions();
-
-            playerMove();
-            player2Move();
-            playerJump();
-            player2Jump();
-
-            ballCollisions();
-            ballMove();
-
-
         } //end of mainloop
 
         function gameSetup() {
@@ -182,27 +221,23 @@
             groundYpos = canvas.height - 80;
         } //end gameSetup
 
-        function menuButtons() {
+        function menuButtons() {   
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= buttonYposTop && mouseY <= buttonYposBot) { // button 1
                 hoverButton1();
                 if (mouseDown) {
-                    console.log('clicking');
-                    drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+                    singePlayerSelect = true;
                 }
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button2YposTop && mouseY <= button2YposBot) { // button 2
                 hoverButton2();
-                if (mouseDown && mouseClicked == false) {
-                    console.log('clicking');
-                    drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
-                    mouseClicked = true;
+                if (mouseDown) {
+                    twoPlayerSelect = true;
                 }
-                mouseClicked = false;
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button3YposTop && mouseY <= button3YposBot) { // button 3
                 hoverButton3();
                 if (mouseDown) {
-                    console.log('clicking');
+                    instructionsSelect = true;
                 }
             }
         } //end of menuButtons
@@ -219,7 +254,11 @@
             imgs.menuScreen = new Image();
             imgs.menuScreen.src = 'img/menuScreen.png';
             imgs.twoPlayerSelection = new Image();
-            imgs.twoPlayerSelection.src = 'img/start.png';
+            imgs.twoPlayerSelection.src = 'img/2playerMenu.png';
+            imgs.instructionsSelection = new Image();
+            imgs.instructionsSelection.src = '';
+            imgs.temporaryStart = new Image();
+            imgs.temporaryStart.src = 'img/start.png';
             return imgs;
         } // end of loadImages
 
@@ -257,7 +296,6 @@
                 if (ballXspeed < 0) {
                     ballXspeed = ballXspeed + friction //*** fix this 
                 }
-                //                console.log(ballXspeed);
             }
         } //end of ballFriction
 
@@ -419,6 +457,10 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = true;
             } //player 1
+            //            if (evt.keyCode == mouseDown) {
+            //                mouseClicked = true;
+            //                console.log('pressed');
+            //            }
         } //end of keyPressed
 
         function keyReleased(evt) {
@@ -447,6 +489,10 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = false;
             } //player 1
+            //            if (evt.keyCode == mouseUp) {
+            //                mouseClicked = false;
+            //                console.log('release');
+            //            }
         } //end of keyReleased
 
         function mouseAction(evt) { //mouse code
@@ -503,15 +549,19 @@
 
         function hoverButton1(x, y, w, h, c) {
             colorRect(buttonXposLeft, buttonYposTop, (buttonXposRight - buttonXposLeft), (buttonYposBot - buttonYposTop), 'rgb(0,0,0,0.2)');
-        } // end of hoverButton1
+        } //end of hoverButton1
 
         function hoverButton2(x, y, w, h, c) {
             colorRect(buttonXposLeft, button2YposTop, (buttonXposRight - buttonXposLeft), (button2YposBot - button2YposTop), 'rgb(0,0,0,0.2)');
-        } // end of hoverButtons2
+        } //end of hoverButtons2
 
         function hoverButton3(x, y, w, h, c) {
             colorRect(buttonXposLeft, button3YposTop, (buttonXposRight - buttonXposLeft), (button3YposBot - button3YposTop), 'rgb(0,0,0,0.2)');
-        } // end of hoverButton3
+        } //end of hoverButton3
+
+        function hoverStartButton(x, y, w, h, c) {
+            colorRect(startButtonLeft, startButtonTop, (startButtonRight - startButtonLeft), (startButtonBot - startButtonTop), 'rgb(0,0,0,0.2)');
+        } //end of hoverStartButton
 
     </script>
 </body>
