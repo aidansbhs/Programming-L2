@@ -1,6 +1,7 @@
 <!doctype html>
+
 <head>
-<title>Big Head Soccer</title>
+    <title>Big Head Soccer</title>
 </head>
 
 <body>
@@ -47,73 +48,38 @@
                 //                console.log(mouseX);
                 //                console.log(mouseY);
 
-//                                var Rectangle;
+                //                                var Rectangle;
             });
         }
 
-        //player movement
 
         //player 1
-        var playerXpos = 0;
-        var playerYpos = 0;
-        const PLAYER_SIZE = 40;
-        var playerXspeed = 3.5;
-        var playerYspeed = 5;
+        player = {
+            PlayerXpos: 0,
+            playerYpos: 0,
+            PLAYER_SIZE: 40,
+            playerXspeed: 3.5,
+            playerYspeed: 5;
+        }
 
-        //player 2
-        var player2Xpos = 0;
-        var player2Ypos = 0;
-        const PLAYER2_SIZE = 40;
-        var player2Xspeed = 3.5;
-        var player2Yspeed = 5;
+        var top = player.playerYpos;
+        var bot = player.playerYpos + player.PLAYER_SIZE;
+        var left = player.PlayerXpos;
+        var right = player.PlayerXpos + player.PLAYER_SIZE;
 
-//         player 3 test
-//                Rectangle = function(x, y, width, height, color) {
-//                    this.x = x;
-//                    this.y = y;
-//                    this.width = width;
-//                    this.height = height;
-//                    this.color = color;
-//                };
-//        
-//                Rectangle.prototype = {
-//        
-//                    draw: function() { // draws rectangle to canvas
-//        
-//                        ctx.beginPath();
-//                        ctx.rect(this.x, this.y, this.width, this.height);
-//                        ctx.fillStyle = this.color;
-//                        ctx.fill();
-//        
-//                    },
-//        
-//                    // get the four side coordinates of the rectangle
-//                    get bottom() {
-//                        return this.y + this.height;
-//                    },
-//                    get left() {
-//                        return this.x;
-//                    },
-//                    get right() {
-//                        return this.x + this.width;
-//                    },
-//                    get top() {
-//                        return this.y;
-//                    },
-//        
-//                    testCollision: function(rectangle) {
-//        
-//                        if (this.top > rectangle.bottom || this.right < rectangle.left || this.bottom < rectangle.top || this.left > rectangle.right) {
-//                            console.log(rectangle);
-//        
-//                            return false;
-//        
-//                        }
-//        
-//                        return true;
-//        
-//                    }
-//                };
+        // player 2
+        player2 = {
+            player2Xpos: 0,
+            player2Ypos: 0,
+            PLAYER2_SIZE: 40,
+            player2Xspeed: 3.5,
+            player2Yspeed: 5;
+        }
+
+        var top2 = player2.player2Ypos;
+        var bot2 = player2.player2Ypos + player2.PLAYER2_SIZE;
+        var left2 = player2.player2Xpos;
+        var right2 = player2.player2Xpos + player2.PLAYER2_SIZE;
 
         //physics
         var gravity = 0.1;
@@ -164,7 +130,6 @@
         //game variables
         var mouseX, mouseY;
         var mouseDown = 0;
-        var mouseUp = 1;
         var startingPos = true;
         var startingPos2 = true;
         var gameStart = false;
@@ -172,7 +137,6 @@
         var twoPlayer = false;
 
         // menu buttons
-
         var mainMenu = true;
         var singlePlayerSelect = false;
         var twoPlayerSelect = false;
@@ -209,7 +173,7 @@
 
                     colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
 
-                    if (singlePlayer == true) { //run single player
+                    if (singlePlayer == true && twoPlayer == false) { //run single player
                         gameSetup();
                         singlePlayerRun();
                         return twoPlayerRun;
@@ -275,7 +239,7 @@
             playerGravity();
             playerMove();
             playerJump();
-//            playerCollisions(); // if this is active then right side of player 2 doesn't work
+            //            playerCollisions(); // if this is active then right side of player 2 doesn't work
 
         } //end of singlePlayerRun
 
@@ -284,12 +248,12 @@
                 startPos2();
                 startingPos2 = false;
             }
-        
-            drawPlayer2();
+
             player2Gravity();
             player2Move();
             player2Jump();
             playerCollisions();
+            drawPlayer2();
 
         } //end of twoPlayerRun
 
@@ -315,13 +279,13 @@
         } //end of menuButtons
 
         function startPos1() { //starting position for player 1 
-            playerXpos = canvas.width / 7 - PLAYER_SIZE / 2;
-            playerYpos = canvas.height / 1.225 - PLAYER_SIZE / 2;
+            player.PlayerXpos = canvas.width / 7 - player.PLAYER_SIZE / 2;
+            player.playerYpos = canvas.height / 1.225 - player.PLAYER_SIZE / 2;
         } //end of startPos
 
         function startPos2() { //starting position for player 2
-            player2Xpos = canvas.width / 1.2 - PLAYER2_SIZE / 2;
-            player2Ypos = canvas.height / 1.225 - PLAYER2_SIZE / 2;
+            player2.player2Xpos = canvas.width / 1.2 - player2.PLAYER2_SIZE / 2;
+            player2.player2Ypos = canvas.height / 1.225 - player2.PLAYER2_SIZE / 2;
         } //end of startPos2
 
         function loadImages() {
@@ -371,17 +335,17 @@
         } //end of ballFriction
 
         function ballCollisions() {
-            if (ball.x - ball.radius <= playerXpos + PLAYER_SIZE && ball.x + ball.radius >= playerXpos && ball.y <= playerYpos + PLAYER_SIZE && ball.y + ball.radius >= playerYpos) { //player1 hitbox with ball
+            if (ball.x - ball.radius <= player.PlayerXpos + player.PLAYER_SIZE && ball.x + ball.radius >= player.PlayerXpos && ball.y <= player.playerYpos + player.PLAYER_SIZE && ball.y + ball.radius >= player.playerYpos) { //player1 hitbox with ball
                 if (playerCollision == false) {
 
                     if (dKeyPressed == false && aKeyPressed == false) {
                         ballXspeed *= -1;
                     } else {
 
-                        if (ball.x < playerXpos + PLAYER_SIZE / 2) {
+                        if (ball.x < player.PlayerXpos + player.PLAYER_SIZE / 2) {
                             ballXspeed = -kickspeed; //fix this *********
                         }
-                        if (ball.x >= playerXpos + PLAYER_SIZE / 2) {
+                        if (ball.x >= player.PlayerXpos + player.PLAYER_SIZE / 2) {
                             ballXspeed = kickspeed;
                         } //if ball inside player it will go outwards in the right direction
                     }
@@ -418,77 +382,32 @@
         } //end of ball Collisions
 
         function playerCollisions() {
-            if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && playerYpos + PLAYER_SIZE >= player2Ypos) { //player 1 collision detection
+            if (player.PlayerXpos + player.PLAYER_SIZE >= player2Xpos && player.PlayerXpos < player2Xpos + PLAYER2_SIZE && player.playerYpos + player.PLAYER_SIZE >= player2Ypos) { //player 1 collision detection
                 playerCollision = true;
             }
-            if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && player2Ypos + PLAYER2_SIZE >= playerYpos) { //player 2 collision detection
+            if (player.PlayerXpos + player.PLAYER_SIZE >= player2Xpos && player.PlayerXpos < player2Xpos + PLAYER2_SIZE && player2Ypos + PLAYER2_SIZE >= player.playerYpos) { //player 2 collision detection
                 player2Collision = true;
             }
-            //player 1
-            var top = playerYpos;
-            var bot = playerYpos + PLAYER_SIZE;
-            var left = playerXpos;
-            var right = playerXpos + PLAYER_SIZE;
-            
-            //player 2
-            var top2 = player2Ypos;
-            var bot2 = player2Ypos + PLAYER2_SIZE;
-            var left2 = player2Xpos;
-            var right2= player2Xpos + PLAYER2_SIZE;
-            
-            if(top >= bot2){ // player 2
-                console.log('working');
-            }
-//            if(bot >= top2){ // bottom of player 1 is greater or eqaul to the top of player 2 - greater = further down on canvas for y axis
-//                console.log('working2');
-//            }
-            if(top2 >= bot && right >= left2 && right2 >= left){ // player 1
-                console.log('working3');
-            }
-//            if(right >= left2){ // right side of player 1 is greater or eqaul to left side of player 2 - greater = further to right on canvas for x axis
-//                console.log('working4');
-//                
-//            }
-//            console.log(playerCollision);
+
+            //            if (top >= bot2) { // player 2
+            //            }
+            //
+            //            if (top2 >= bot && right >= left2 && right2 >= left) { // player 1
+            //            }
+
         } //end of playerCollisions
 
         function playerMove() {
-            var left = false;
-            var right = false;
-            if (dKeyPressed && playerXpos < canvas.width - PLAYER_SIZE && playerCollision == false) { //move right if not outside canvas and not collding with anything
-                playerXpos += playerXspeed; // x move right
-                right = true;
-            } else if ((playerXpos + (PLAYER_SIZE / 2)) < (player2Xpos + (PLAYER2_SIZE / 2)) && aKeyPressed && playerXpos > 0) { // player can move left if player 2 is on right side
-                playerXpos -= playerXspeed; // x move left
-                left = true;
-            }
-            if (aKeyPressed && playerXpos > 0 && playerCollision == false && left == false) {
-                playerXpos -= playerXspeed; // x move left
-            } else if ((playerXpos + (PLAYER_SIZE / 2)) > (player2Xpos + (PLAYER2_SIZE / 2)) && dKeyPressed && playerXpos < canvas.width - PLAYER_SIZE && right == false) { //player can move right if player 2 is on left
-                playerXpos += playerXspeed; // x move right
-            }
+
         } //end of playerMove
 
         function player2Move() {
-            var left = false;
-            var right = false;
-            if (rightKeyPressed && player2Xpos < canvas.width - PLAYER2_SIZE && player2Collision == false) { //move right if not outside canvas and not collding with anything
-                player2Xpos += player2Xspeed; // x move right
-                right = true;
-            } else if ((playerXpos + (PLAYER_SIZE / 2)) > (player2Xpos + (PLAYER2_SIZE / 2)) && leftKeyPressed && player2Xpos > 0) { // player can move left if player 2 is on right side
-                player2Xpos -= player2Xspeed; // x move left
-                left = true;
-            }
-            if (leftKeyPressed && player2Xpos > 0 && player2Collision == false && left == false) {
-                player2Xpos -= player2Xspeed; // x move left
-            } else if ((playerXpos + (PLAYER_SIZE / 2)) < (player2Xpos + (PLAYER2_SIZE / 2)) && rightKeyPressed && player2Xpos < canvas.width - PLAYER2_SIZE && right == false) { //player can move right if player 2 is on left
-                player2Xpos += player2Xspeed; // x move right
-            }
+
         } //end of player2Move
 
         function playerGravity() {
-            if (gravity > -60 && playerYpos < groundYpos - PLAYER_SIZE) {
-                playerYpos += gravity / 5;
+            if (gravity > -60 && player.playerYpos < groundYpos - player.PLAYER_SIZE) {
+                player.playerYpos += gravity / 5;
                 gravity += 2;
             }
         } //end of gravity
@@ -504,11 +423,11 @@
             if (wKeyPressed && jumping == false) {
                 jumping = true;
                 gravity = jumpForce; //jump speed
-                playerYpos += gravity;
+                player.playerYpos += gravity;
             }
-            if (playerYpos + PLAYER_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the ground line
-                playerYSpeed = 0;
-                playerYpos = groundYpos - PLAYER_SIZE; //to stop player sinking through the ground
+            if (player.playerYpos + player.PLAYER_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the ground line
+                player.playerYSpeed = 0;
+                player.playerYpos = groundYpos - player.PLAYER_SIZE; //to stop player sinking through the ground
                 jumping = false;
                 gravity = 0;
             }
@@ -611,7 +530,7 @@
 
         function drawPlayer(x, y, w, h, c) {
             ctx.fillStyle = 'red';
-            ctx.fillRect(playerXpos, playerYpos, PLAYER_SIZE, PLAYER_SIZE);
+            ctx.fillRect(player.PlayerXpos, player.playerYpos, player.PLAYER_SIZE, player.PLAYER_SIZE);
         } //end of drawPlayer
 
         function drawPlayer2(x, y, w, h, c) {
