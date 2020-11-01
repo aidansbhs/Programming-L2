@@ -115,15 +115,20 @@
         //game variables
         var mouseX, mouseY;
         var mouseDown = 0;
-        var mouseUp = 1;
-        //        var mouseClicked = false;
+        var timer = setInterval(function() {
+            startGameTimer(count);
+        }, 1000)
+        var count = 3;
         var startingPos = true;
-        var gameStart = true;
+        var startingPos2 = true;
+        var gameStart = false;
+        var singlePlayer = false;
+        var twoPlayer = false;
 
         // menu buttons
 
         var mainMenu = true;
-        var singePlayerSelect = false;
+        var singlePlayerSelect = false;
         var twoPlayerSelect = false;
         var instructionsSelect = false;
 
@@ -156,40 +161,24 @@
             if (mainMenu == false) {
                 if (gameStart == true) {
 
-
                     colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
 
-                    if (startingPos) { //starting position
-                        startPos();
-                        startingPos = false;
+                    if (singlePlayer == true) { //run single player
+                        gameSetup();
+                        singlePlayerRun();
+                        return twoPlayerRun;
                     }
-
-                    gameSetup();
-
-                    drawGround();
-                    drawBall();
-                    drawPlayer();
-                    drawPlayer2();
-
-                    playerGravity();
-                    player2Gravity();
-
-                    playerCollisions();
-
-                    playerMove();
-                    player2Move();
-                    playerJump();
-                    player2Jump();
-
-                    ballCollisions();
-                    ballMove();
-
+                    if (twoPlayer == true) { // run two player
+                        gameSetup();
+                        twoPlayerRun();
+                        singlePlayerRun(); // has to be correct order in order for collisons to work
+                    }
                 }
             } else {
                 drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height); //draws the menu screen
                 menuButtons(); //allows for menu buttons to be interacted with
 
-                if (singePlayerSelect == true) { //display screen for single play select if it is true inside the menu buttons function
+                if (singlePlayerSelect == true) { //display screen for single play select if it is true inside the menu buttons function
                     drawImage(imageAssets.temporaryStart, 0, 0, canvas.width, canvas.height);
                     twoPlayerSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
                     instructionsSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
@@ -198,18 +187,20 @@
                         if (mouseDown) {
                             mainMenu = false;
                             gameStart = true;
+                            singlePlayer = true;
                         }
                     }
                 }
-                if (twoPlayerSelect == true) {  //display screen for two player select if it is true inside the menuButtons function
+                if (twoPlayerSelect == true) { //display screen for two player select if it is true inside the menuButtons function
                     drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
-                    singePlayerSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
+                    singlePlayerSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
                     instructionsSelect = false; //makes it so you can't select the other buttons under the current screen selection, relying on a back button in order to change selection
                     if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
                         hoverStartButton();
                         if (mouseDown) {
                             mainMenu = false;
                             gameStart = true;
+                            twoPlayer = true;
                         }
                     }
                 }
@@ -219,13 +210,48 @@
         function gameSetup() {
             groundLength = canvas.width;
             groundYpos = canvas.height - 80;
+
+            drawGround();
+            drawBall();
+            ballCollisions();
+            ballMove();
+
         } //end gameSetup
 
-        function menuButtons() {   
+        function singlePlayerRun() { //all functions requried for single player
+            if (startingPos == true) { //starting position
+                startPos1();
+                startingPos = false;
+            }
+
+            drawPlayer();
+            playerGravity();
+            playerMove();
+            playerJump();
+            //            playerCollisions(); // if this is active then right side of player 2 doesn't work
+
+        } //end of singlePlayerRun
+
+        function twoPlayerRun() { // all functions required for two player 
+            if (startingPos2 == true) {
+                startPos2();
+                startingPos2 = false;
+            }
+
+            drawPlayer2();
+            player2Gravity();
+            player2Move();
+            player2Jump();
+            playerCollisions();
+            startGameTimer();
+
+        } //end of twoPlayerRun
+
+        function menuButtons() {
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= buttonYposTop && mouseY <= buttonYposBot) { // button 1
                 hoverButton1();
                 if (mouseDown) {
-                    singePlayerSelect = true;
+                    singlePlayerSelect = true;
                 }
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button2YposTop && mouseY <= button2YposBot) { // button 2
@@ -242,12 +268,15 @@
             }
         } //end of menuButtons
 
-        function startPos() { //starting positions for game variables
+        function startPos1() { //starting position for player 1 
             playerXpos = canvas.width / 7 - PLAYER_SIZE / 2;
             playerYpos = canvas.height / 1.225 - PLAYER_SIZE / 2;
+        } //end of startPos
+
+        function startPos2() { //starting position for player 2
             player2Xpos = canvas.width / 1.2 - PLAYER2_SIZE / 2;
             player2Ypos = canvas.height / 1.225 - PLAYER2_SIZE / 2;
-        } //end of startPos
+        } //end of startPos2
 
         function loadImages() {
             imgs = [];
@@ -289,10 +318,6 @@
                 if (ballXspeed > 0) {
                     ballXspeed = ballXspeed - friction;
                 }
-                //                } else if(Math.abs(ballXspeed) < 1.5){
-                //                    friction = 0.5;
-                //                    ballXspeed = ballXspeed - friction;
-                //                }
                 if (ballXspeed < 0) {
                     ballXspeed = ballXspeed + friction //*** fix this 
                 }
@@ -431,6 +456,22 @@
             }
         } //end of player2Jump
 
+        function startGameTimer() {
+            if (singlePlayer == true || twoPlayer == true) {
+                count -= 1;
+            }
+            if (count === 0) {
+                clearInterval(timer);
+                gameStart = true;
+            } else {
+                gameStart = false;
+            }
+            console.log(count);
+            if (count < 0) {
+                count = 0;
+            }
+        }
+
         function keyPressed(evt) {
             if (evt.keyCode == LEFT_KEY) {
                 leftKeyPressed = true;
@@ -457,10 +498,6 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = true;
             } //player 1
-            //            if (evt.keyCode == mouseDown) {
-            //                mouseClicked = true;
-            //                console.log('pressed');
-            //            }
         } //end of keyPressed
 
         function keyReleased(evt) {
@@ -489,10 +526,6 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = false;
             } //player 1
-            //            if (evt.keyCode == mouseUp) {
-            //                mouseClicked = false;
-            //                console.log('release');
-            //            }
         } //end of keyReleased
 
         function mouseAction(evt) { //mouse code
