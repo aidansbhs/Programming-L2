@@ -1,8 +1,7 @@
 <!doctype html>
-
-<html>
-
-</html>
+<head>
+<title>Big Head Soccer</title>
+</head>
 
 <body>
     <style>
@@ -48,7 +47,7 @@
                 //                console.log(mouseX);
                 //                console.log(mouseY);
 
-                //                var Rectangle;
+//                                var Rectangle;
             });
         }
 
@@ -68,52 +67,53 @@
         var player2Xspeed = 3.5;
         var player2Yspeed = 5;
 
-        // player 3 test
-        //        Rectangle = function(x, y, width, height, color) {
-        //            this.x = x;
-        //            this.y = y;
-        //            this.width = width;
-        //            this.height = height;
-        //            this.color = color;
-        //        };
-        //
-        //        Rectangle.prototype = {
-        //
-        //            draw: function() { // draws rectangle to canvas
-        //
-        //                ctx.beginPath();
-        //                ctx.rect(this.x, this.y, this.width, this.height);
-        //                ctx.fillStyle = this.color;
-        //                ctx.fill();
-        //
-        //            },
-        //
-        //            // get the four side coordinates of the rectangle
-        //            get bottom() {
-        //                return this.y + this.height;
-        //            },
-        //            get left() {
-        //                return this.x;
-        //            },
-        //            get right() {
-        //                return this.x + this.width;
-        //            },
-        //            get top() {
-        //                return this.y;
-        //            },
-        //
-        //            testCollision: function(rectangle) {
-        //
-        //                if (this.top > rectangle.bottom || this.right < rectangle.left || this.bottom < rectangle.top || this.left > rectangle.right) {
-        //
-        //                    return false;
-        //
-        //                }
-        //
-        //                return true;
-        //
-        //            }
-        //        };
+//         player 3 test
+//                Rectangle = function(x, y, width, height, color) {
+//                    this.x = x;
+//                    this.y = y;
+//                    this.width = width;
+//                    this.height = height;
+//                    this.color = color;
+//                };
+//        
+//                Rectangle.prototype = {
+//        
+//                    draw: function() { // draws rectangle to canvas
+//        
+//                        ctx.beginPath();
+//                        ctx.rect(this.x, this.y, this.width, this.height);
+//                        ctx.fillStyle = this.color;
+//                        ctx.fill();
+//        
+//                    },
+//        
+//                    // get the four side coordinates of the rectangle
+//                    get bottom() {
+//                        return this.y + this.height;
+//                    },
+//                    get left() {
+//                        return this.x;
+//                    },
+//                    get right() {
+//                        return this.x + this.width;
+//                    },
+//                    get top() {
+//                        return this.y;
+//                    },
+//        
+//                    testCollision: function(rectangle) {
+//        
+//                        if (this.top > rectangle.bottom || this.right < rectangle.left || this.bottom < rectangle.top || this.left > rectangle.right) {
+//                            console.log(rectangle);
+//        
+//                            return false;
+//        
+//                        }
+//        
+//                        return true;
+//        
+//                    }
+//                };
 
         //physics
         var gravity = 0.1;
@@ -136,7 +136,7 @@
         var groundLength = 0;
 
         //ball speeds
-        var ballXspeed = 4;
+        var ballXspeed = 3.5;
         var ballYspeed = 1;
 
         //controls for players
@@ -217,7 +217,7 @@
                     if (twoPlayer == true) { // run two player
                         gameSetup();
                         twoPlayerRun();
-                        singlePlayerRun(); //think this has to be correct order in order for collisons to work
+                        singlePlayerRun(); // has to be correct order in order for collisons to work
                     }
                 }
 
@@ -275,7 +275,7 @@
             playerGravity();
             playerMove();
             playerJump();
-            playerCollisions();
+//            playerCollisions(); // if this is active then right side of player 2 doesn't work
 
         } //end of singlePlayerRun
 
@@ -418,13 +418,38 @@
         } //end of ball Collisions
 
         function playerCollisions() {
-            if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && playerYpos + PLAYER_SIZE >= player2Ypos) {
+            if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && playerYpos + PLAYER_SIZE >= player2Ypos) { //player 1 collision detection
                 playerCollision = true;
             }
-            if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && player2Ypos + PLAYER2_SIZE >= playerYpos) {
+            if (playerXpos + PLAYER_SIZE >= player2Xpos && playerXpos < player2Xpos + PLAYER2_SIZE && player2Ypos + PLAYER2_SIZE >= playerYpos) { //player 2 collision detection
                 player2Collision = true;
             }
-            console.log(playerCollision);
+            //player 1
+            var top = playerYpos;
+            var bot = playerYpos + PLAYER_SIZE;
+            var left = playerXpos;
+            var right = playerXpos + PLAYER_SIZE;
+            
+            //player 2
+            var top2 = player2Ypos;
+            var bot2 = player2Ypos + PLAYER2_SIZE;
+            var left2 = player2Xpos;
+            var right2= player2Xpos + PLAYER2_SIZE;
+            
+            if(top >= bot2){ // player 2
+                console.log('working');
+            }
+//            if(bot >= top2){ // bottom of player 1 is greater or eqaul to the top of player 2 - greater = further down on canvas for y axis
+//                console.log('working2');
+//            }
+            if(top2 >= bot && right >= left2 && right2 >= left){ // player 1
+                console.log('working3');
+            }
+//            if(right >= left2){ // right side of player 1 is greater or eqaul to left side of player 2 - greater = further to right on canvas for x axis
+//                console.log('working4');
+//                
+//            }
+//            console.log(playerCollision);
         } //end of playerCollisions
 
         function playerMove() {
