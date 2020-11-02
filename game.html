@@ -55,17 +55,17 @@
 
         //player 1
         player = {
-            PlayerXpos: 0,
+            playerXpos: 0,
             playerYpos: 0,
             PLAYER_SIZE: 40,
             playerXspeed: 3.5,
-            playerYspeed: 5;
+            playerYspeed: 5,
         }
 
-        var top = player.playerYpos;
-        var bot = player.playerYpos + player.PLAYER_SIZE;
-        var left = player.PlayerXpos;
-        var right = player.PlayerXpos + player.PLAYER_SIZE;
+        //        var top = player.playerYpos;
+        //        var bot = player.playerYpos + player.PLAYER_SIZE;
+        //        var left = player.playerXpos;
+        //        var right = player.playerXpos + player.PLAYER_SIZE;
 
         // player 2
         player2 = {
@@ -73,24 +73,25 @@
             player2Ypos: 0,
             PLAYER2_SIZE: 40,
             player2Xspeed: 3.5,
-            player2Yspeed: 5;
+            player2Yspeed: 5,
         }
 
-        var top2 = player2.player2Ypos;
-        var bot2 = player2.player2Ypos + player2.PLAYER2_SIZE;
-        var left2 = player2.player2Xpos;
-        var right2 = player2.player2Xpos + player2.PLAYER2_SIZE;
+        //        var top2 = player2.player2Ypos;
+        //        var bot2 = player2.player2Ypos + player2.PLAYER2_SIZE;
+        //        var left2 = player2.player2Xpos;
+        //        var right2 = player2.player2Xpos + player2.PLAYER2_SIZE;
 
         //physics
         var gravity = 0.1;
         var gravity2 = 0.1;
-        var ballGravity = 0.2;
+        var ballGravity = 0.15;
         var bounce = 0.6;
         var friction = 0.1;
         var jumpForce = -30;
         var jumping = false;
         var jumping2 = false;
-        var kickspeed = 5;
+        var kickspeed = 4.5;
+        var stacking = false;
 
         var playerCollision = false;
         var player2Collision = false;
@@ -102,8 +103,10 @@
         var groundLength = 0;
 
         //ball speeds
-        var ballXspeed = 3.5;
-        var ballYspeed = 1;
+        var ballXspeed = 0;
+        var ballYspeed = 0;
+        var minBallXspeed = 1.5;
+        var maxBallXspeed = 3.5;
 
         //controls for players
 
@@ -173,7 +176,7 @@
 
                     colorRect(0, 0, canvas.width, canvas.height, 'black'); // bg
 
-                    if (singlePlayer == true && twoPlayer == false) { //run single player
+                    if (singlePlayer == true) { //run single player
                         gameSetup();
                         singlePlayerRun();
                         return twoPlayerRun;
@@ -249,11 +252,11 @@
                 startingPos2 = false;
             }
 
+            drawPlayer2();
             player2Gravity();
             player2Move();
             player2Jump();
             playerCollisions();
-            drawPlayer2();
 
         } //end of twoPlayerRun
 
@@ -279,7 +282,7 @@
         } //end of menuButtons
 
         function startPos1() { //starting position for player 1 
-            player.PlayerXpos = canvas.width / 7 - player.PLAYER_SIZE / 2;
+            player.playerXpos = canvas.width / 7 - player.PLAYER_SIZE / 2;
             player.playerYpos = canvas.height / 1.225 - player.PLAYER_SIZE / 2;
         } //end of startPos
 
@@ -321,88 +324,127 @@
             if (ball.x < 0 + ball.radius && ballXspeed < 0) { //left edge bounce
                 ballXspeed *= -1;
             }
+//            if(ballXspeed >= maxBallXspeed){
+//                ballXspeed -= 0.5;
+//            }
+//            console.log(ballXspeed);
+//            console.log(ballYspeed);
         } //end of ballMove
 
         function ballFriction() {
-            if (Math.abs(ballXspeed) > 1.5) { //apply friction if ball speed is bigger than this
+            if (Math.abs(ballXspeed) > minBallXspeed) { //apply friction if ball speed is bigger than this
                 if (ballXspeed > 0) {
                     ballXspeed = ballXspeed - friction;
+                } else if (ballXspeed < 0) {
+                    ballXspeed = ballXspeed + friction;
                 }
-                if (ballXspeed < 0) {
-                    ballXspeed = ballXspeed + friction; //*** fix this 
+            } else if (Math.abs(ballXspeed) > minBallXspeed / 2) { //stages of friction
+                if (ballXspeed > 0) {
+                    ballXspeed = ballXspeed - friction / 4;
+                } else if (ballXspeed < 0) {
+                    ballXspeed = ballXspeed + friction / 4;
+                }
+            } else if (Math.abs(ballXspeed) > minBallXspeed / 4) {
+                if (ballXspeed > 0) {
+                    ballXspeed = ballXspeed - friction / 8;
+                } else if (ballXspeed < 0) {
+                    ballXspeed = ballXspeed + friction / 8;
+                }
+            } else if (Math.abs(ballXspeed) > minBallXspeed / 8) {
+                if (ballXspeed > 0) {
+                    ballXspeed = ballXspeed - friction / 16;
+                } else if (ballXspeed < 0) {
+                    ballXspeed = ballXspeed + friction / 16;
                 }
             }
         } //end of ballFriction
 
         function ballCollisions() {
-            if (ball.x - ball.radius <= player.PlayerXpos + player.PLAYER_SIZE && ball.x + ball.radius >= player.PlayerXpos && ball.y <= player.playerYpos + player.PLAYER_SIZE && ball.y + ball.radius >= player.playerYpos) { //player1 hitbox with ball
+            if (ball.x - ball.radius <= player.playerXpos + player.PLAYER_SIZE && ball.x + ball.radius >= player.playerXpos && ball.y <= player.playerYpos + player.PLAYER_SIZE && ball.y + ball.radius >= player.playerYpos) { //player1 hitbox with ball
+
                 if (playerCollision == false) {
 
                     if (dKeyPressed == false && aKeyPressed == false) {
                         ballXspeed *= -1;
                     } else {
-
-                        if (ball.x < player.PlayerXpos + player.PLAYER_SIZE / 2) {
+                        if (ball.x < player.playerXpos + player.PLAYER_SIZE / 2) {
                             ballXspeed = -kickspeed; //fix this *********
                         }
-                        if (ball.x >= player.PlayerXpos + player.PLAYER_SIZE / 2) {
+                        if (ball.x >= player.playerXpos + player.PLAYER_SIZE / 2) {
                             ballXspeed = kickspeed;
                         } //if ball inside player it will go outwards in the right direction
                     }
                 }
                 ballYspeed = gravity / 5 - 2; //how high the ball goes when player hits it in the y direction
                 playerCollision = true;
-                player2Collision = false;
+                //                player2Collision = false;
             } else {
                 playerCollision = false;
             } //end of player 1 collisions with ball
 
-            if (ball.x - ball.radius <= player2Xpos + PLAYER2_SIZE && ball.x + ball.radius >= player2Xpos && ball.y <= player2Ypos + PLAYER2_SIZE && ball.y + ball.radius >= player2Ypos) { //player 2 hitbox when it touches ball
+            if (ball.x - ball.radius <= player2.player2Xpos + player2.PLAYER2_SIZE && ball.x + ball.radius >= player2.player2Xpos && ball.y <= player2.player2Ypos + player2.PLAYER2_SIZE && ball.y + ball.radius >= player2.player2Ypos) { //player 2 hitbox when it touches ball
 
                 if (player2Collision == false) {
 
                     if (rightKeyPressed == false && leftKeyPressed == false) {
                         ballXspeed *= -1;
                     } else {
-                        if (ball.x < player2Xpos + PLAYER2_SIZE / 2) {
+                        if (ball.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
                             ballXspeed = -kickspeed;
                         }
-                        if (ball.x >= player2Xpos + PLAYER2_SIZE / 2) {
+                        if (ball.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
                             ballXspeed = kickspeed;
                         } //if ball inside player it will go outwards in the right direction
                     }
+                    //                }
                 }
                 ballYspeed = gravity2 / 5 - 1; //how high the ball goes when player 2 hits it in the y direction
                 player2Collision = true;
-                playerCollision = false;
             } else {
                 player2Collision = false;
             } //end of player 2 collisions with ball
-
+            //            console.log(playerCollision, player2Collision);
         } //end of ball Collisions
 
         function playerCollisions() {
-            if (player.PlayerXpos + player.PLAYER_SIZE >= player2Xpos && player.PlayerXpos < player2Xpos + PLAYER2_SIZE && player.playerYpos + player.PLAYER_SIZE >= player2Ypos) { //player 1 collision detection
+            if (player.playerXpos + player.PLAYER_SIZE >= player2.player2Xpos && player.playerXpos < player2.player2Xpos + player2.PLAYER2_SIZE && player.playerYpos + player.PLAYER_SIZE >= player2.player2Ypos) {
                 playerCollision = true;
-            }
-            if (player.PlayerXpos + player.PLAYER_SIZE >= player2Xpos && player.PlayerXpos < player2Xpos + PLAYER2_SIZE && player2Ypos + PLAYER2_SIZE >= player.playerYpos) { //player 2 collision detection
+                if(dKeyPressed == true && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE){
+                    player2.player2Xpos += player.playerXspeed;
+                }
+                if (player.playerYpos < player2.player2Ypos + player2.PLAYER2_SIZE && player.playerXpos) {
+                    player.playerYpos = player2.player2Ypos - player2.PLAYER2_SIZE;
+                    stacking = true;
+                } else {
+                    stacking = false;
+                }
+                
+                if (stacking = false) {
+                    player.playerYpos = groundYpos - player.PLAYER_SIZE; // to stop sinking through ground after getting off stack
+                } 
+            } //player 1 collisions
+            
+            if (player.playerXpos + player.PLAYER_SIZE >= player2.player2Xpos && player.playerXpos < player2.player2Xpos + player2.PLAYER2_SIZE && player2.player2Ypos + player2.PLAYER2_SIZE >= player.playerYpos) {
                 player2Collision = true;
-            }
-
-            //            if (top >= bot2) { // player 2
-            //            }
-            //
-            //            if (top2 >= bot && right >= left2 && right2 >= left) { // player 1
-            //            }
-
+            } //player 2 collisions
         } //end of playerCollisions
 
         function playerMove() {
-
+            if (dKeyPressed && player.playerXpos < canvas.width - player.PLAYER_SIZE) {
+                player.playerXpos += player.playerXspeed; // x move right if not outside canvas
+            }
+            if (aKeyPressed && player.playerXpos > 0) {
+                player.playerXpos -= player.playerXspeed; // x move left if not outside canvas
+            }
         } //end of playerMove
 
         function player2Move() {
-
+            if (rightKeyPressed && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE) {
+                player2.player2Xpos += player2.player2Xspeed; // x move right if not outside canvas
+            }
+            if (leftKeyPressed && player2.player2Xpos > 0) {
+                player2.player2Xpos -= player2.player2Xspeed; // x move left if  not outside canvas
+            }
         } //end of player2Move
 
         function playerGravity() {
@@ -413,8 +455,8 @@
         } //end of gravity
 
         function player2Gravity() {
-            if (gravity2 > -60 && player2Ypos < groundYpos - PLAYER2_SIZE) {
-                player2Ypos += gravity2 / 5;
+            if (gravity2 > -60 && player2.player2Ypos < groundYpos - player2.PLAYER2_SIZE) {
+                player2.player2Ypos += gravity2 / 5;
                 gravity2 += 2;
             }
         } //end of gravity2
@@ -425,7 +467,7 @@
                 gravity = jumpForce; //jump speed
                 player.playerYpos += gravity;
             }
-            if (player.playerYpos + player.PLAYER_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the ground line
+            if (player.playerYpos + player.PLAYER_SIZE >= groundYpos && stacking == false) { //cannot jump more if player xpos is greater than the ground line
                 player.playerYSpeed = 0;
                 player.playerYpos = groundYpos - player.PLAYER_SIZE; //to stop player sinking through the ground
                 jumping = false;
@@ -437,11 +479,11 @@
             if (upKeyPressed && jumping2 == false) {
                 jumping2 = true;
                 gravity2 = jumpForce; //jump force speed
-                player2Ypos += gravity2;
+                player2.player2Ypos += gravity2;
             }
-            if (player2Ypos + PLAYER2_SIZE >= groundYpos) { //cannot jump more if player xpos is greater than the horizon line
-                player2YSpeed = 0;
-                player2Ypos = groundYpos - PLAYER2_SIZE; //to stop player sinking through horizonYpos
+            if (player2.player2Ypos + player2.PLAYER2_SIZE >= groundYpos && stacking == false) { //cannot jump more if player xpos is greater than the horizon line
+                player2.player2YSpeed = 0;
+                player2.player2Ypos = groundYpos - player2.PLAYER2_SIZE; //to stop player sinking through horizonYpos
                 jumping2 = false;
                 gravity2 = 0;
             }
@@ -530,12 +572,12 @@
 
         function drawPlayer(x, y, w, h, c) {
             ctx.fillStyle = 'red';
-            ctx.fillRect(player.PlayerXpos, player.playerYpos, player.PLAYER_SIZE, player.PLAYER_SIZE);
+            ctx.fillRect(player.playerXpos, player.playerYpos, player.PLAYER_SIZE, player.PLAYER_SIZE);
         } //end of drawPlayer
 
         function drawPlayer2(x, y, w, h, c) {
             ctx.fillStyle = 'blue';
-            ctx.fillRect(player2Xpos, player2Ypos, PLAYER2_SIZE, PLAYER2_SIZE);
+            ctx.fillRect(player2.player2Xpos, player2.player2Ypos, player2.PLAYER2_SIZE, player2.PLAYER2_SIZE);
         } //end of drawPlayer2
 
         function drawGround(x, y, w, h, c) {
