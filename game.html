@@ -45,10 +45,8 @@
                 var mousePos = mouseAction(evt);
                 mouseX = mousePos.x;
                 mouseY = mousePos.y;
-//                                                console.log(mouseX);
-//                                                console.log(mouseY);
-
-                //                                var Rectangle;
+                //                                                console.log(mouseX);
+                //                                                console.log(mouseY);
             });
         }
 
@@ -62,11 +60,6 @@
             playerYspeed: 5,
         }
 
-        //        var top = player.playerYpos;
-        //        var bot = player.playerYpos + player.PLAYER_SIZE;
-        //        var left = player.playerXpos;
-        //        var right = player.playerXpos + player.PLAYER_SIZE;
-
         // player 2
         player2 = {
             player2Xpos: 0,
@@ -75,11 +68,6 @@
             player2Xspeed: 3.5,
             player2Yspeed: 5,
         }
-
-        //        var top2 = player2.player2Ypos;
-        //        var bot2 = player2.player2Ypos + player2.PLAYER2_SIZE;
-        //        var left2 = player2.player2Xpos;
-        //        var right2 = player2.player2Xpos + player2.PLAYER2_SIZE;
 
         //physics
         var gravity = 0.1;
@@ -182,80 +170,47 @@
 
         var backButtonTop = 19.65625;
         var backButtonBot = 54;
-        
+
+        //goals coordiantes
         var goalLeft = 11.5;
         var goalRight = 105.5;
-        
+
         var goal2Left = 692.5;
         var goal2Right = 785.5;
-        
+
         var goalTop = 347.6;
         var goalBot = 500;
 
         function mainloop() {
-            if (restart == false) {
-                if (mainMenu == false) {
-                    if (gameStart == true) {
+            if (mainMenu == false) {
+                if (gameStart == true) {
 
-                        drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
+                    drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
 
-                        if (singlePlayer == true) { //run single player
-                            gameSetup();
-                            singlePlayerRun();
-                            return twoPlayerRun;
-                        }
-                        if (twoPlayer == true) { // run two player
-                            gameSetup();
-                            twoPlayerRun();
-                            singlePlayerRun(); // has to be correct order in order for collisons to work
-                        }
+                    if (singlePlayer == true) { //run single player
+                        gameSetup();
+                        singlePlayerRun();
+                        return twoPlayerRun;
                     }
-
-                } else {
-                    drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height); //draws the menu screen
-                    menuButtons(); //allows for menu buttons to be interacted with
-
-                    if (singlePlayerSelect == true) { //display screen for single play select if it is true inside the menu buttons function
-                        drawImage(imageAssets.temporaryStart, 0, 0, canvas.width, canvas.height);
-
-                        if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) { // coordinates of button
-                            hoverStartButton();
-                            if (mouseDown) {
-                                mainMenu = false;
-                                gameStart = true;
-                                singlePlayer = true;
-                            }
-                        }
+                    if (twoPlayer == true) { // run two player
+                        gameSetup();
+                        twoPlayerRun();
+                        singlePlayerRun(); // has to be correct order in order for collisons to work
                     }
+                }
+            } else {
+                drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height); //draws the menu screen
+                menuButtons(); //allows for menu buttons to be interacted with
 
-                    if (twoPlayerSelect == true) { //display screen for two player select if it is true inside the menuButtons function
-                        drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+                if (singlePlayerSelect == true) { //display screen for single play select if it is true inside the menu buttons function
+                    singlePlayerSelection();
+                    startButton();
 
-                        if (mouseX >= backButtonLeft && mouseX <= backButtonRight && mouseY >= backButtonTop && mouseY <= backButtonBot) {
-                            hoverBackButton();
-                            if (mouseDown) {
-                                twoPlayerSelect = false;
-                                backButtonClicked = true;
-                                mainMenu = true;
-                            }
-                        }
-                        if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
-                            hoverStartButton();
-                            if (mouseDown) {
-                                mainMenu = false;
-                                gameStart = true;
-                                twoPlayer = true;
-                            }
-                        }
-                    }
-
-                    if (backButtonClicked == true) {
-                        drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
-                        restart = true;
-                    } 
+                } else if (twoPlayerSelect == true) { //display screen for two player select if it is true inside the menuButtons function
+                    twoPlayerSelection();
+                    startButton();
                 }
             }
-//            console.log(restart);
         } //end of mainloop
 
         function gameSetup() {
@@ -280,7 +235,6 @@
             playerGravity();
             playerMove();
             playerJump();
-            //            playerCollisions(); // if this is active then right side of player 2 doesn't work
 
         } //end of singlePlayerRun
 
@@ -318,6 +272,54 @@
                 }
             }
         } //end of menuButtons
+
+        function singlePlayerSelection() {
+            drawImage(imageAssets.temporaryStart, 0, 0, canvas.width, canvas.height);
+        } //end of singlePlayerSelection
+
+        function twoPlayerSelection() { // when twoPlayerSelect equals true run this
+            drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+
+            if (mouseX >= backButtonLeft && mouseX <= backButtonRight && mouseY >= backButtonTop && mouseY <= backButtonBot) {
+                hoverBackButton();
+                if (mouseDown) {
+                    backButton();
+                }
+            }
+        } //end of twoPlayerSelection
+
+        function backButton() {
+            twoPlayerSelect = false;
+            singlePlayerSelect = false;
+            mainMenu = true;
+            drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
+        } //end of backButton
+
+        function startButton() {
+            if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
+                hoverStartButton();
+                if (mouseDown) {
+                    if (singlePlayerSelect == true) {
+                        startSinglePlayer();
+                    }
+                    if (twoPlayerSelect == true) {
+                        startTwoPlayer();
+                    }
+                }
+            }
+        } //end of startButton
+
+        function startTwoPlayer() {
+            mainMenu = false;
+            gameStart = true;
+            twoPlayer = true;
+        } //end of startTwoplayer
+
+        function startSinglePlayer() {
+            mainMenu = false;
+            gameStart = true;
+            singlePlayer = true;
+        } //end of startSinglePlayer
 
         function startPos1() { //starting position for player 1 
             player.playerXpos = canvas.width / 7 - player.PLAYER_SIZE / 2;
@@ -381,7 +383,7 @@
                 } else if (ballXspeed < 0) {
                     ballXspeed = ballXspeed + friction / 4;
                 }
-            } else if (Math.abs(ballXspeed) > minBallXspeed / 4) {
+            } else if (Math.abs(ballXspeed) > minBallXspeed / 4) { //gets less as ball speed decreases
                 if (ballXspeed > 0) {
                     ballXspeed = ballXspeed - friction / 8;
                 } else if (ballXspeed < 0) {
@@ -414,7 +416,7 @@
                 }
                 ballYspeed = gravity / 5 - 2; //how high the ball goes when player hits it in the y direction
                 playerCollision = true;
-                //                player2Collision = false;
+                player2Collision = false;
             } else {
                 playerCollision = false;
             } //end of player 1 collisions with ball
@@ -433,7 +435,6 @@
                             ballXspeed = kickspeed;
                         } //if ball inside player it will go outwards in the right direction
                     }
-                    //                }
                 }
                 ballYspeed = gravity2 / 5 - 1; //how high the ball goes when player 2 hits it in the y direction
                 player2Collision = true;
@@ -452,16 +453,16 @@
                     pushing = false;
                 }
 
-                if (pushing == true && pushing2 == false && stacking == false && stacking2 == false && leftKeyPressed == false) {
-                    player2.player2Xpos += player.playerXspeed;
-                }
-
-                if (player.playerYpos + player.PLAYER_SIZE > player2.player2Ypos && player.playerYpos + player.PLAYER_SIZE < player2.player2Ypos + player2.PLAYER2_SIZE / 2) { //stacking
+                if (player.playerYpos + player.PLAYER_SIZE >= player2.player2Ypos && player.playerYpos + player.PLAYER_SIZE <= player2.player2Ypos + player2.PLAYER2_SIZE / 2) { //stacking
                     player.playerYpos = player2.player2Ypos - player2.PLAYER2_SIZE;
                     gravity = gravity2;
                     stacking = true;
                 } else {
                     stacking = false;
+                }
+                if (pushing == true && pushing2 == false && stacking == false && stacking2 == false && leftKeyPressed == false) {
+                    player2.player2Xpos += player.playerXspeed / 2;
+                    player.playerXpos -= player.playerXspeed / 2;
                 }
             } else {
                 stacking = false;
@@ -484,7 +485,7 @@
 
                 if (player2.player2Ypos + player2.PLAYER2_SIZE > player.playerYpos && player2.playerYpos + player2.PLAYER2_SIZE < player.playerYpos + player.PLAYER_SIZE / 2) { // stacking
                     player2.player2Ypos = player.playerYpos - player.PLAYER_SIZE;
-                    gravity2 = gravity;
+                    gravity2 = gravity; //makes it so players aren't constantly gaining gravity when stacked and therefore fall off
                     stacking2 = true;
                 } else {
                     stacking2 = false;
@@ -497,7 +498,7 @@
             //            player.playerXspeed = 0;
             //            player2.player2Xspeed = 0;
             //        }
-//            console.log(pushing);
+            //            console.log(pushing);
         } //end of playerCollisions
 
         function playerMove() {
@@ -536,7 +537,7 @@
             if (wKeyPressed && jumping == false) {
                 jumping = true;
                 gravity = jumpForce; //jump speed
-                player.playerYpos += gravity / 10;
+                player.playerYpos += gravity / 9;
                 if (stacking == true) {
                     gravity2 = gravity;
                 }
@@ -554,7 +555,7 @@
             if (upKeyPressed && jumping2 == false) {
                 jumping2 = true;
                 gravity2 = jumpForce; //jump force speed
-                player2.player2Ypos += gravity2 / 10;
+                player2.player2Ypos += gravity2 / 9;
                 if (stacking2 == true) {
                     gravity = gravity2;
                 }
@@ -566,11 +567,21 @@
                 gravity2 = 0;
             }
         } //end of player2Jump
-        
-        function scoring(){
-            if(ball.x < goalRight && ball.y > goalTop && ball.y < goalBot){
+
+        function scoring() {
+            if (ball.x < goalRight && ball.y > goalTop && ball.y < goalBot) {
                 console.log('goal!');
             }
+            if (ball.x > goal2Left && ball.y > goalTop && ball.y < goalBot) {
+                console.log('goal2!');
+                if (ball.x > goal2Left && ball.x <= canvas.width - ball.radius) {
+                    ballXspeed = friction * 14;
+                    console.log('ball is caught in net');
+                }
+            }
+            //            if (ball.x > canvas.width - ball.radius && ballXspeed > 0) { //right edge bounce
+            //                ballXspeed = 0;
+            //            }
         }
 
         function keyPressed(evt) {
@@ -628,12 +639,6 @@
                 sKeyPressed = false;
             } //player 1
         } //end of keyReleased
-
-        //        function name(){
-        //            if(gameStart = false && twoPlayerSelect == true){
-        //                
-        //            }
-        //        }
 
         function mouseAction(evt) { //mouse code
             var rect = canvas.getBoundingClientRect();
