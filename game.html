@@ -153,13 +153,7 @@
         var reset = false;
         var resetCount = 50;
         var gameFinished = false;
-
-        //        var restart = false;
-        //        var shiftkeyPressed = false;
-        //        const SHIFT_KEY = 16;
-        //        var maxNameLength = 15;
-
-
+      
         // menu buttons
         var mainMenu = true;
         var singlePlayerSelect = false;
@@ -240,6 +234,7 @@
                 } else if (twoPlayerSelect == true) { //display screen for two player select if it is true inside the menuButtons function
                     twoPlayerSelection();
                     startButton();
+
                 }
             }
             //            colorRect(0, 0, canvas.width, canvas.height, "rgb(50,50,50,1)");
@@ -263,9 +258,8 @@
                 scoring();
             }
         } //end gameSetup
-
+                      
         function singlePlayerRun() { //all functions requried for single player
-            //            if (reset == false) {
             if (startingPos == true) { //starting position
                 startPos1();
                 startingPos = false;
@@ -293,7 +287,7 @@
         } //end of singlePlayerRun
 
         function twoPlayerRun() { // all functions required for two player 
-            //            if (reset == false) {
+
             if (startingPos2 == true) {
                 startPos2();
                 startingPos2 = false;
@@ -383,7 +377,7 @@
         function startPos1() { //starting position for player 1 
             player.playerXpos = canvas.width / 6 - player.PLAYER_SIZE / 2;
             player.playerYpos = canvas.height / 1.21 - player.PLAYER_SIZE / 2;
-        } //end of startPos
+        } //end of startPos1
 
         function startPos2() { //starting position for player 2
             player2.player2Xpos = canvas.width / 1.2 - player2.PLAYER2_SIZE / 2;
@@ -684,7 +678,7 @@
                 gravity2 = 0;
             }
         } //end of player2Jump
-
+          
         function scoring() {
             if (ball.x < goalRight && ball.y > goalTop && ball.y < goalBot) {
                 leftGoalScored = true;
@@ -771,7 +765,7 @@
                 }
             }
         } //end of startGameTimer
-
+          
         function keyPressed(evt) {
             if (evt.keyCode == LEFT_KEY) {
                 leftKeyPressed = true;
@@ -798,40 +792,6 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = true;
             } //player 1
-
-            //             if(evt.keyCode == SHIFT_KEY){
-            //                shiftkeyPressed = true;
-            //            }
-
-            //            if (evt.keyCode > 0) {
-            //                console.log(evt.keyCode);
-            //                if (playerStats[0].length == 0) {
-            //                    if (evt.keyCode == 8) {
-            //                        playerStats[0].pop();
-            //                    } else if (shiftkeyPressed == true && evt.keyCode !== 16) {
-            //                        playerStats[0].push(String.fromCharCode(evt.keyCode));
-            //                    } else if (evt.keyCode !== 16) {
-            //                        playerStats[0].push(String.fromCharCode(evt.keyCode).toLowerCase());
-            //                    }
-            //                } else {
-            //                    if (evt.keyCode == 8) {
-            //                        if (playerStats[0][0].length == 1) {
-            //                            playerStats[0][0] = "";
-            //                        } else if (playerStats[0][0].length !== 0) {
-            //                            backSpaceContainer = playerStats[0][0][0];
-            //                            for (let l = 1; l < playerStats[0][0].length - 1; l++) {
-            //                                backSpaceContainer += playerStats[0][0][l];
-            //                            }
-            //                            playerStats[0][0] = backSpaceContainer;
-            //                        }
-            //                    } else if (shiftKeyPressed == true && evt.keyCode !== 16) {
-            //                        playerStats[0][0] += (String.fromCharCode(evt.keyCode));
-            //                    } else if (evt.keyCode !== 16) {
-            //                        playerStats[0][0] += (String.fromCharCode(evt.keyCode).toLowerCase());
-            //                    }
-            //                }
-            //            }
-
         } //end of keyPressed
 
         function keyReleased(evt) {
@@ -860,18 +820,8 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = false;
             } //player 1
-
-            //            if(evt.keyCode == SHIFT_KEY){
-            //                shiftkeyPressed = false;
-            //            }
-
         } //end of keyReleased
 
-        //        var test = false;
-        //        var backSpaceContainer;
-        //        var playerStats = [
-        //            []
-        //        ];
 
         function mouseAction(evt) { //mouse code
             var rect = canvas.getBoundingClientRect();
@@ -957,3 +907,4 @@
 
     </script>
 </body>
+
