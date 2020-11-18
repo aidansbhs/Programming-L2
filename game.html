@@ -21,8 +21,6 @@
     <script>
         var canvas, ctx;
 
-        var ball;
-
         window.onload = function() {
             canvas = document.getElementById('gameCanvas');
             ctx = canvas.getContext('2d');
@@ -31,22 +29,18 @@
 
             setInterval(mainloop, 1000 / 50);
 
-            ball = {
-                x: canvas.width / 2,
-                y: canvas.height / 2,
-                radius: 13,
-                status: 0
-            }; //ball size and starting position
-
             document.addEventListener('keydown', keyPressed);
             document.addEventListener('keyup', keyReleased);
+
+            makeBall();
 
             document.addEventListener('mousemove', function(evt) { //mouse code
                 var mousePos = mouseAction(evt);
                 mouseX = mousePos.x;
                 mouseY = mousePos.y;
-                //                                                console.log(mouseX);
-                //                                                console.log(mouseY);
+
+                //                                                                console.log(mouseX);
+                //                console.log(mouseY);
             });
         }
 
@@ -79,13 +73,12 @@
         //physics
         var gravity = 0.1;
         var gravity2 = 0.1;
-        var ballGravity = 0.15;
         var bounce = 0.6;
         var friction = 0.1;
         var jumpForce = -30;
         var jumping = false;
         var jumping2 = false;
-        var kickspeed = 4;
+        var kickspeed = 4.5;
         var normalSpeed = 3.5;
         var stacking = false;
         var stacking2 = false;
@@ -98,22 +91,15 @@
         var p1RW = false;
         var p2LW = false;
         var p2RW = false;
-
-        var playerCollision = false;
-        var player2Collision = false;
-        var player3Collision = false;
+        var temp1 = false;
+        var temp2 = false;
+        var minBallXspeed = 1.5;
 
         //ground variables
         var groundYpos = 0;
         var groundXpos = 0;
         var groundWidth = 0;
         var groundLength = 0;
-
-        //ball speeds
-        var ballXspeed = Math.floor(Math.random() * (3 - -1.5)) - 1.5;
-        var ballYspeed = 0;
-        var minBallXspeed = 1.5;
-        var maxBallXspeed = 3.5;
 
         //controls for players
 
@@ -146,8 +132,9 @@
         var gameStart = false;
         var singlePlayer = false;
         var twoPlayer = false;
-        var count = -1;
+        var gameFinished = false;
         var startGame = false;
+        var count = -1;
         var score1 = 0;
         var score2 = 0;
         var leftGoalScored = false;
@@ -156,9 +143,18 @@
         var goalScored2 = false;
         var startRestartCount = false;
         var reset = false;
-        var resetCount = 70;
-        var gameFinished = false;
+        var resetCount = 50;
         var endGameCount = 110;
+        var balls = [];
+        var goldenGoal = false;
+        var twoBalls = false;
+        var firstToSeven = true;
+        var timed = false;
+        var regular = true;
+        //        var bigGoal = false;
+        //        var smallGoal = false;
+        var easy = true;
+        var hard = false;
 
         // menu buttons
         var mainMenu = true;
@@ -167,47 +163,28 @@
         var instructionsSelect = false;
         var backButtonClicked = false;
 
-        //coordinates
+        //for the username function
+        //        var nameBoxClicked = false;
+        //        var name = [
+        //            ['Naruto'],
+        //            []
+        //        ];
+        //        var backSpaceContainer;
+        //        var attempt = 1;
 
-        //button 1-3 x
-        var buttonXposLeft = 283.5;
-        var buttonXposRight = 508;
 
-        //button 1 y
-        var buttonYposTop = 206.6;
-        var buttonYposBot = 254;
-
-        //button 2 y
-        var button2YposTop = 282.6;
-        var button2YposBot = 330;
-
-        //button 3 y
-        var button3YposTop = 358.6;
-        var button3YposBot = 406;
-
-        //start button
-        var startButtonLeft = 307.5;
-        var startButtonRight = 465.5;
-
-        var startButtonTop = 405.6;
-        var startButtonBot = 445.5;
-
-        //back button
-        var backButtonLeft = 10.5;
-        var backButtonRight = 111;
-
-        var backButtonTop = 19.65625;
-        var backButtonBot = 54;
-
-        //goals coordiantes
-        var goalLeft = 11.5;
-        var goalRight = 105.5;
-
-        var goal2Left = 692.5;
-        var goal2Right = 785.5;
-
-        var goalTop = 347.6;
-        var goalBot = 500;
+        //prompts
+//        var maxLength = 12;
+//
+//        var name = prompt("What is your name?", 'Naruto') //prompt asks for user name
+//        while (name.length < 2 || name.length > maxLength || name == 'null') {
+//            alert("Please type a valid name"); //if the user types a name that is less than 2 characters or doesn't type anything it will reprompt them 
+//            name = prompt("What's your name?");
+//        }
+//        var difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy'); //asks user for what difficulty they want 
+//        while (difficulty !== 'easy' && difficulty !== 'hard') { // if the users response is not easy or hard, it will prompt them again 
+//            difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy');
+//        }
 
         function mainloop() {
             if (mainMenu == false) {
@@ -240,7 +217,23 @@
                 } else if (twoPlayerSelect == true) { //display screen for two player select if it is true inside the menuButtons function
                     twoPlayerSelection();
                     startButton();
+
+                } else if (instructionsSelect == true) {
+                    instructionSelection();
                 }
+
+                //user name function - drawing on canvas
+                //                if (nameBoxClicked == true) {
+                //                    if (name[attempt].length >= 1) {
+                //                        drawText(canvas.width / 2, canvas.height / 2, name, "15px Arial", "rgb(255,255,255,1)", "left"); //draws text from players input
+                //                    }
+                //                } else if (nameBoxClicked == false && gameStart == true && name[attempt].length <= 0) { //if player didn't write anything
+                //                    name[attempt][0] = 'player1'; //sets emepty player name to player1
+                //                } else {
+                //                    if (name[attempt][0].length <= 0) { //if they wrote something then deleted all of it
+                //                        name[attempt][0] = 'player1'; //sets it to player1
+                //                    }
+                //                }
             }
         } //end of mainloop
 
@@ -250,7 +243,10 @@
 
             drawGround();
             startGameTimer();
-            drawBall();
+            balls.forEach(Element => {
+                drawBall(Element.x, Element.y, Element.radius, 'white');
+            });
+
             if (count <= 10) {
                 ballCollisions();
                 ballMove();
@@ -274,7 +270,6 @@
                     botMove();
 
                 }
-
                 drawBot();
             }
             drawPlayer();
@@ -303,20 +298,31 @@
         } //end of twoPlayerRun
 
         function menuButtons() {
+
+            //button coordinates
+            let buttonXposLeft = 283.5;
+            let buttonXposRight = 508;
+            let buttonYposTop = 206.6;
+            let buttonYposBot = 254;
+            let button2YposTop = 282.6;
+            let button2YposBot = 330;
+            let button3YposTop = 358.6;
+            let button3YposBot = 406;
+
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= buttonYposTop && mouseY <= buttonYposBot) { // button 1 coordinates
-                hoverButton1();
+                colorRect(buttonXposLeft, buttonYposTop, (buttonXposRight - buttonXposLeft), (buttonYposBot - buttonYposTop), 'rgb(0,0,0,0.2)'); //hover
                 if (mouseDown && twoPlayerSelect == false && instructionsSelect == false) {
                     singlePlayerSelect = true;
                 }
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button2YposTop && mouseY <= button2YposBot) { // button 2 coordinates
-                hoverButton2();
+                colorRect(buttonXposLeft, button2YposTop, (buttonXposRight - buttonXposLeft), (button2YposBot - button2YposTop), 'rgb(0,0,0,0.2)'); //hover 
                 if (mouseDown && singlePlayerSelect == false && instructionsSelect == false) {
                     twoPlayerSelect = true;
                 }
             }
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= button3YposTop && mouseY <= button3YposBot) { // button 3 coordinates
-                hoverButton3();
+                colorRect(buttonXposLeft, button3YposTop, (buttonXposRight - buttonXposLeft), (button3YposBot - button3YposTop), 'rgb(0,0,0,0.2)'); //hover
                 if (mouseDown & singlePlayerSelect == false && twoPlayerSelect == false) {
                     instructionsSelect = true;
                 }
@@ -324,43 +330,163 @@
         } //end of menuButtons
 
         function singlePlayerSelection() {
-            drawImage(imageAssets.temporaryStart, 0, 0, canvas.width, canvas.height);
 
-            if (mouseX >= backButtonLeft && mouseX <= backButtonRight && mouseY >= backButtonTop && mouseY <= backButtonBot) {
-                hoverBackButton();
+            //name box coordinates
+            let nameBoxLeft = 322;
+            let nameBoxRight = 453.5;
+            let nameBoxTop = 196.65;
+            let nameBoxBot = 240;
+
+            let difficultyLeft = 177;
+            let difficultyRight = 195;
+            let difficultyTop = 323.5;
+            let difficultyBot = 345.5;
+
+            let gameplayLeft = 461.5;
+            let gameplayRight = 478.5;
+            let gameplayTop = 323.5;
+            let gameplayBot = 345.5;
+
+            drawImage(imageAssets.singlePlayerSelection, 0, 0, canvas.width, canvas.height);
+            backButton();
+
+            drawText(370, 223, name, "16px Arial", "rgb(255,255,255,1)", "center");
+
+            //name box
+
+            //            if (mouseX >= nameBoxLeft && mouseX <= nameBoxRight && mouseY >= nameBoxTop && mouseY <= nameBoxBot) { //dimensions of name box 
+            //                colorRect(nameBoxLeft, nameBoxTop, (nameBoxRight - nameBoxLeft), (nameBoxBot - nameBoxTop), 'rgb(255,255,255,0.2)'); //hover
+            //                if (mouseDown) { //clicks
+            //                    nameBoxClicked = true;
+            //                }
+            //            }
+
+            if (mouseX >= difficultyLeft && mouseX <= difficultyRight && mouseY >= difficultyTop && mouseY <= difficultyBot) {
+                colorRect(difficultyLeft, difficultyTop, (difficultyRight - difficultyLeft), (difficultyBot - difficultyTop), 'rgb(255,255,255,0.2)');
                 if (mouseDown) {
-                    backButton();
+                    hard = true;
+                    easy = false;
+                } else {
+                    easy = true;
+                    hard = false;
+                }
+            }
+            if (easy == true) {
+                drawText(227, 341, "Easy", "16px Arial", "rgb(0,0,0,1)", "center");
+            }
+            if (hard == true) {
+                drawText(227, 341, "Hard", "16px Arial", "rgb(0,0,0,1)", "center");
+            }
+
+            if (mouseX >= gameplayLeft && mouseX <= gameplayRight && mouseY >= gameplayTop && mouseY <= gameplayBot) {
+                colorRect(gameplayLeft, gameplayTop, (gameplayRight - gameplayLeft), (gameplayBot - gameplayTop), 'rgb(255,255,255,0.2)');
+                if (mouseDown) {
+                    regular = false;
+                    twoBalls = true;
+                } else {
+                    regular = true;
+                    twoBalls = false;
+                }
+            }
+            if (regular == true) {
+                drawText(520, 340, "Regular", "16px Arial", "rgb(0,0,0,1)", "center");
+            }
+            if (twoBalls == true) {
+                drawText(525, 340, "Two Balls", "16px Arial", "rgb(0,0,0,1)", "center");
+                if (gameStart == true) {
+                    makeBall();
                 }
             }
         } //end of singlePlayerSelection
 
         function twoPlayerSelection() { // when twoPlayerSelect equals true run this
-            drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
 
-            if (mouseX >= backButtonLeft && mouseX <= backButtonRight && mouseY >= backButtonTop && mouseY <= backButtonBot) {
-                hoverBackButton();
+            let squareLeft = 318.5;
+            let squareRight = 337;
+            let squareTop = 325.6;
+            let sqaureBot = 344.6;
+
+            let square2Top = 354;
+            let square2Bot = 374;
+
+
+            drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
+            backButton();
+
+            if (mouseX >= squareLeft && mouseX <= squareRight && mouseY >= squareTop && mouseY <= sqaureBot) { //sqaure 1
+                colorRect(squareLeft, squareTop, (squareRight - squareLeft), (sqaureBot - squareTop), 'rgb(255,255,255,0.2)');
                 if (mouseDown) {
-                    backButton();
+                    firstToSeven = false;
+                    goldenGoal = true;
                 }
+            }
+
+            if (mouseX >= squareLeft && mouseX <= squareRight && mouseY >= square2Top && mouseY <= square2Bot) { //sqaure 2
+                colorRect(squareLeft, square2Top, (squareRight - squareLeft), (square2Bot - square2Top), 'rgb(255,255,255,0.2)');
+                if (mouseDown) {
+                    regular = false;
+                    twoBalls = true;
+                }
+            }
+            if (firstToSeven == true) {
+                drawText(390, 340, "First to Seven", "16px Arial", "rgb(0,0,0,1)", "center");
+            }
+
+            if (goldenGoal == true) {
+                drawText(387, 340, "Golden Goal", "16px Arial", "rgb(0,0,0,1)", "center");
+            }
+
+            if (regular == true) {
+                drawText(370, 370, "Regular", "16px Arial", "rgb(0,0,0,1)", "center");
+            }
+            if (twoBalls == true) {
+                drawText(378, 370, "Two Balls", "16px Arial", "rgb(0,0,0,1)", "center");
             }
         } //end of twoPlayerSelection
 
+        function instructionSelection() {
+            drawImage(imageAssets.instructionsSelection, 0, 0, canvas.width, canvas.height);
+            backButton();
+        } //end of instructionSelection
+
         function backButton() {
-            twoPlayerSelect = false;
-            singlePlayerSelect = false;
-            mainMenu = true;
-            drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
+
+            //back button coordinates
+            let backButtonLeft = 10.5;
+            let backButtonRight = 111;
+            let backButtonTop = 19.65625;
+            let backButtonBot = 54;
+
+            if (mouseX >= backButtonLeft && mouseX <= backButtonRight && mouseY >= backButtonTop && mouseY <= backButtonBot) {
+                colorRect(backButtonLeft, backButtonTop, (backButtonRight - backButtonLeft), (backButtonBot - backButtonTop), 'rgb(0,0,0,0.2)'); //hover
+                if (mouseDown) {
+                    twoPlayerSelect = false;
+                    singlePlayerSelect = false;
+                    instructionsSelect = false;
+                    mainMenu = true;
+                    drawImage(imageAssets.menuScreen, 0, 0, canvas.width, canvas.height);
+                }
+            }
         } //end of backButton
 
         function startButton() {
+
+            //start button coordinates
+            let startButtonLeft = 307.5;
+            let startButtonRight = 465.5;
+            let startButtonTop = 405.6;
+            let startButtonBot = 445.5;
+
             if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
-                hoverStartButton();
+                colorRect(startButtonLeft, startButtonTop, (startButtonRight - startButtonLeft), (startButtonBot - startButtonTop), 'rgb(0,0,0,0.2)'); //hover
                 if (mouseDown) {
                     if (singlePlayerSelect == true) {
                         startSinglePlayer();
+                        singlePlayerSelect = false;
                     }
                     if (twoPlayerSelect == true) {
                         startTwoPlayer();
+                        twoPlayerSelect = false;
                     }
                 }
             }
@@ -368,14 +494,18 @@
 
         function startTwoPlayer() {
             mainMenu = false;
+            gameFinished = false;
             gameStart = true;
             twoPlayer = true;
+            twoPlayerSelect = false;
         } //end of startTwoplayer
 
         function startSinglePlayer() {
             mainMenu = false;
+            gameFinished = false;
             gameStart = true;
             singlePlayer = true;
+            singlePlayerSelect = false;
         } //end of startSinglePlayer
 
         function startPos1() { //starting position for player 1 
@@ -399,599 +529,670 @@
             imgs.background.src = 'img/tempBack.png';
             imgs.menuScreen = new Image();
             imgs.menuScreen.src = 'img/menuScreen.png';
+            imgs.singlePlayerSelection = new Image();
+            imgs.singlePlayerSelection.src = 'img/singlePlayerMenu.png';
             imgs.twoPlayerSelection = new Image();
             imgs.twoPlayerSelection.src = 'img/2playerMenu.png';
             imgs.instructionsSelection = new Image();
-            imgs.instructionsSelection.src = '';
-            imgs.temporaryStart = new Image();
-            imgs.temporaryStart.src = 'img/start.png';
+            imgs.instructionsSelection.src = 'img/instructionMenu.png';
             imgs.player1 = new Image();
             imgs.player1.src = 'img/player1.png';
             imgs.player2 = new Image();
             imgs.player2.src = 'img/player2.png';
+            imgs.bot = new Image();
+            imgs.bot.src = 'img/bot.png';
             return imgs;
         } // end of loadImages
 
+        function makeBall() {
+            balls.push({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                radius: 13,
+                status: 0,
+                ballXspeed: 3.5,
+                ballYspeed: 0,
+                ballGravity: 0.15,
+                ballRandomTest1: false,
+                ballRandomTest2: false
+            });
+        } //end of makeBall
+
         function ballMove() {
-            ball.x += ballXspeed; //x speed
-            ball.y += ballYspeed; //y spped
-            ballYspeed += ballGravity; //apply gravity to ball y speed
+            balls.forEach(Element => {
+                Element.x += Element.ballXspeed; //x speed
+                Element.y += Element.ballYspeed; //y speed
+                Element.ballYspeed += Element.ballGravity; //apply gravity to ball y speed
+                if (Element.y + Element.radius > groundYpos) { //if the ball is greater than the ground floor
+                    Element.y = groundYpos - Element.radius; //reposition on the ground
+                    Element.ballYspeed *= -bounce; //bounce the ball
 
-            if (ball.y + ball.radius > groundYpos) { //if the ball is greater than the ground floor
-                ball.y = groundYpos - ball.radius; //reposition on the ground
-                ballYspeed *= -bounce; //bounce the ball
-
-                if (ballYspeed < 0 && ballYspeed > -2.2) { //do this otherwise, ball never stops bouncing
-                    ballYspeed = 0;
+                    if (Element.ballYspeed < 0 && Element.ballYspeed > -2.2) { //do this otherwise, ball never stops bouncing
+                        Element.ballYspeed = 0;
+                    }
+                    ballFriction(); //apply friction
                 }
-                ballFriction(); //apply friction
-            }
-            if (ball.x > canvas.width - ball.radius && ballXspeed > 0) { //right edge bounce
-                ballXspeed *= -1;
-            }
-            if (ball.x < 0 + ball.radius && ballXspeed < 0) { //left edge bounce
-                ballXspeed *= -1;
-            }
+                if (Element.x > canvas.width - Element.radius && Element.ballXspeed > 0) { //right edge bounce
+                    Element.ballXspeed *= -1;
+                }
+                if (Element.x < 0 + Element.radius && Element.ballXspeed < 0) { //left edge bounce
+                    Element.ballXspeed *= -1;
+                }
+            });
         } //end of ballMove
 
         function ballFriction() {
-            if (Math.abs(ballXspeed) > minBallXspeed) { //apply friction if ball speed is bigger than this
-                if (ballXspeed > 0) {
-                    ballXspeed = ballXspeed - friction;
-                } else if (ballXspeed < 0) {
-                    ballXspeed = ballXspeed + friction;
+            balls.forEach(Element => {
+                if (Math.abs(Element.ballXspeed) > minBallXspeed) { //apply friction if ball speed is bigger than this
+                    if (Element.ballXspeed > 0) {
+                        Element.ballXspeed = Element.ballXspeed - friction;
+                    } else if (Element.ballXspeed < 0) {
+                        Element.ballXspeed = Element.ballXspeed + friction;
+                    }
+                } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 2) { //stages of friction
+                    if (Element.ballXspeed > 0) {
+                        Element.ballXspeed = Element.ballXspeed - friction / 4;
+                    } else if (Element.ballXspeed < 0) {
+                        Element.ballXspeed = Element.ballXspeed + friction / 4;
+                    }
+                } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 4) { //gets less as ball speed decreases
+                    if (Element.ballXspeed > 0) {
+                        Element.ballXspeed = Element.ballXspeed - friction / 8;
+                    } else if (Element.ballXspeed < 0) {
+                        Element.ballXspeed = Element.ballXspeed + friction / 8;
+                    }
+                } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 8) {
+                    if (Element.ballXspeed > 0) {
+                        Element.ballXspeed = Element.ballXspeed - friction / 16;
+                    } else if (Element.ballXspeed < 0) {
+                        Element.ballXspeed = Element.ballXspeed + friction / 16;
+                    }
                 }
-            } else if (Math.abs(ballXspeed) > minBallXspeed / 2) { //stages of friction
-                if (ballXspeed > 0) {
-                    ballXspeed = ballXspeed - friction / 4;
-                } else if (ballXspeed < 0) {
-                    ballXspeed = ballXspeed + friction / 4;
-                }
-            } else if (Math.abs(ballXspeed) > minBallXspeed / 4) { //gets less as ball speed decreases
-                if (ballXspeed > 0) {
-                    ballXspeed = ballXspeed - friction / 8;
-                } else if (ballXspeed < 0) {
-                    ballXspeed = ballXspeed + friction / 8;
-                }
-            } else if (Math.abs(ballXspeed) > minBallXspeed / 8) {
-                if (ballXspeed > 0) {
-                    ballXspeed = ballXspeed - friction / 16;
-                } else if (ballXspeed < 0) {
-                    ballXspeed = ballXspeed + friction / 16;
-                }
-            }
+            });
         } //end of ballFriction
 
         function ballCollisions() {
-            if (ball.x - ball.radius <= player.playerXpos + player.PLAYER_SIZE && ball.x + ball.radius >= player.playerXpos && ball.y <= player.playerYpos + player.PLAYER_SIZE && ball.y + ball.radius >= player.playerYpos) { //player1 hitbox with ball
+            balls.forEach(Element => {
+                if (Element.x - Element.radius <= player.playerXpos + player.PLAYER_SIZE && Element.x + Element.radius >= player.playerXpos && Element.y <= player.playerYpos + player.PLAYER_SIZE && Element.y + Element.radius >= player.playerYpos) { //player1 hitbox with ball
 
-                if (dKeyPressed == false && aKeyPressed == false && ballRandomTest1 == false) {
-                    if (gravity >= 4) {
-                        if (ball.x < player.playerXpos + player.PLAYER_SIZE / 2) {
-                            ballXspeed = -kickspeed;
-                            ballRandomTest1 = true;
-                        }
-                        if (ball.x >= player.playerXpos + player.PLAYER_SIZE / 2) {
-                            ballXspeed = kickspeed;
-                            ballRandomTest1 = true;
-                        }
-                    } else {
-                        if (ball.x < player.playerXpos + player.PLAYER_SIZE / 2 && ballXspeed > 0) {
-                            ballXspeed = -ballXspeed + ballXspeed / 4;
-                        } else if (ball.x >= player.playerXpos + player.PLAYER_SIZE / 2 && ballXspeed < 0) {
-                            ballXspeed = -ballXspeed - ballXspeed / 4;
-                        }
-                    }
-                    } else {
-                        if (ball.x < player.playerXpos + player.PLAYER_SIZE / 2) {
-                            ballXspeed = -kickspeed; //fix this *********
-                        }
-                        if (ball.x >= player.playerXpos + player.PLAYER_SIZE / 2) {
-                            ballXspeed = kickspeed;
-                        } //if ball inside player it will go outwards in the right direction
-                    }
-                    ballYspeed = gravity / 5 - 2; //how high the ball goes when player hits it in the y direction
-                } //end of player 1 collisions with ball
-
-                if (ball.x - ball.radius <= player2.player2Xpos + player2.PLAYER2_SIZE && ball.x + ball.radius >= player2.player2Xpos && ball.y <= player2.player2Ypos + player2.PLAYER2_SIZE && ball.y + ball.radius >= player2.player2Ypos) { //player 2 hitbox when it touches ball
-
-                    if (rightKeyPressed == false && leftKeyPressed == false && ballRandomTest2 == false) {
-                        if (gravity2 >= 4) {
-                            if (ball.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
-                                ballXspeed = -kickspeed;
-                                ballRandomTest2 = true;
+                    if (dKeyPressed == false && aKeyPressed == false && Element.ballRandomTest1 == false) {
+                        if (gravity >= 4) {
+                            if (Element.x < player.playerXpos + player.PLAYER_SIZE / 2) {
+                                Element.ballXspeed = -kickspeed;
+                                Element.ballRandomTest1 = true;
                             }
-                            if (ball.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
-                                ballXspeed = kickspeed;
-                                ballRandomTest2 = true;
+                            if (Element.x >= player.playerXpos + player.PLAYER_SIZE / 2) {
+                                Element.ballXspeed = kickspeed;
+                                Element.ballRandomTest1 = true;
                             }
                         } else {
-                            if (ball.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2 && ballXspeed > 0) {
-                                ballXspeed = -ballXspeed + ballXspeed / 4;
-                            } else if (ball.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2 && ballXspeed < 0) {
-                                ballXspeed = -ballXspeed - ballXspeed / 4;
+                            if (Element.x < player.playerXpos + player.PLAYER_SIZE / 2 && Element.ballXspeed > 0) {
+                                Element.ballXspeed = -Element.ballXspeed + Element.ballXspeed / 4;
+                            } else if (Element.x >= player.playerXpos + player.PLAYER_SIZE / 2 && Element.ballXspeed < 0) {
+                                Element.ballXspeed = -Element.ballXspeed - Element.ballXspeed / 4;
                             }
                         }
                     } else {
-                        if (ball.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
-                            ballXspeed = -kickspeed;
+                        if (Element.x < player.playerXpos + player.PLAYER_SIZE / 2) {
+                            Element.ballXspeed = -kickspeed; //fix this *********. Wow! watch you language aidan - jono
                         }
-                        if (ball.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
-                            ballXspeed = kickspeed;
+                        if (Element.x >= player.playerXpos + player.PLAYER_SIZE / 2) {
+                            Element.ballXspeed = kickspeed;
                         } //if ball inside player it will go outwards in the right direction
                     }
-                    ballYspeed = gravity2 / 5 - 2; //how high the ball goes when player 2 hits it in the y direction
+                    Element.ballYspeed = gravity / 5 - 2; //how high the ball goes when player hits it in the y direction
                 } else {
-                    ballRandomTest2 = false;
+                    Element.ballRandomTest1 = false;
+                } //end of player 1 collisions with ball
+
+                if (Element.x - Element.radius <= player2.player2Xpos + player2.PLAYER2_SIZE && Element.x + Element.radius >= player2.player2Xpos && Element.y <= player2.player2Ypos + player2.PLAYER2_SIZE && Element.y + Element.radius >= player2.player2Ypos) { //player 2 hitbox when it touches ball
+
+                    if (rightKeyPressed == false && leftKeyPressed == false && Element.ballRandomTest2 == false) {
+                        if (gravity2 >= 4) {
+                            if (Element.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
+                                Element.ballXspeed = -kickspeed;
+                                Element.ballRandomTest2 = true;
+                            }
+                            if (Element.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
+                                Element.ballXspeed = kickspeed;
+                                Element.ballRandomTest2 = true;
+                            }
+                        } else {
+                            if (Element.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2 && Element.ballXspeed > 0) {
+                                Element.ballXspeed = -Element.ballXspeed + Element.ballXspeed / 4;
+                            } else if (Element.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2 && Element.ballXspeed < 0) {
+                                Element.ballXspeed = -Element.ballXspeed - Element.ballXspeed / 4;
+                            }
+                        }
+                    } else {
+                        if (Element.x < player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
+                            Element.ballXspeed = -kickspeed;
+                        }
+                        if (Element.x >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
+                            Element.ballXspeed = kickspeed;
+                        } //if ball inside player it will go outwards in the right direction
+                    }
+                    Element.ballYspeed = gravity2 / 5 - 2; //how high the ball goes when player 2 hits it in the y direction
+                } else {
+                    Element.ballRandomTest2 = false;
                 } //end of player 2 collisions with ball
 
-                if (ball.x - ball.radius <= bot.botXpos + bot.BOT_SIZE && ball.x + ball.radius >= bot.botXpos && ball.y <= bot.botYpos + bot.BOT_SIZE && ball.y + ball.radius >= bot.botYpos) { //player 2 hitbox when it touches ball
+                if (Element.x - Element.radius <= bot.botXpos + bot.BOT_SIZE && Element.x + Element.radius >= bot.botXpos && Element.y <= bot.botYpos + bot.BOT_SIZE && Element.y + Element.radius >= bot.botYpos) { //player 2 hitbox when it touches ball
 
                     if (rightKeyPressed == false && leftKeyPressed == false) {
-                        ballXspeed *= -1;
+                        Element.ballXspeed *= -1;
                     } else {
-                        if (ball.x < bot.botXpos + bot.BOT_SIZE / 2) {
-                            ballXspeed = -kickspeed;
+                        if (Element.x < bot.botXpos + bot.BOT_SIZE / 2) {
+                            Element.ballXspeed = -kickspeed;
                         }
-                        if (ball.x >= bot.botXpos + bot.BOT_SIZE / 2) {
-                            ballXspeed = kickspeed;
+                        if (Element.x >= bot.botXpos + bot.BOT_SIZE / 2) {
+                            Element.ballXspeed = kickspeed;
                         } //if ball inside player it will go outwards in the right direction
                     }
-                    ballYspeed = gravity2 / 5 - 1; //how high the ball goes when player 2 hits it in the y direction
+                    Element.ballYspeed = gravity2 / 5 - 1; //how high the ball goes when player 2 hits it in the y direction
                 }
-            } //end of ball Collisions
+            });
+        } //end of ball Collisions
 
-            var ballRandomTest1 = false;
-            var ballRandomTest2 = false;
+        function playerCollisions() {
+            if (player.playerXpos + player.PLAYER_SIZE >= player2.player2Xpos && player.playerXpos < player2.player2Xpos + player2.PLAYER2_SIZE && player.playerYpos + player.PLAYER_SIZE >= player2.player2Ypos) { //player 1 hitbox
 
-            function playerCollisions() {
-                if (player.playerXpos + player.PLAYER_SIZE >= player2.player2Xpos && player.playerXpos < player2.player2Xpos + player2.PLAYER2_SIZE && player.playerYpos + player.PLAYER_SIZE >= player2.player2Ypos) { //player 1 hitbox
-                    //                playerCollision = true;
+                if (aKeyPressed == true && player2.player2Xpos > 0 && player.playerXpos >= player2.player2Xpos) { //player 1 pushing player 2 left
+                    pushingLeft = true
+                }
+                if (dKeyPressed == true && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE) { //player 1 pushing player 2 right
+                    pushingRight = true;
+                }
 
-                    if (aKeyPressed == true && player2.player2Xpos > 0 && player.playerXpos >= player2.player2Xpos) { //player 1 pushing player 2 left
-                        pushingLeft = true
-                    } else {
-                        pushingLeft = false;
-                    }
-                    if (dKeyPressed == true && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE) { //player 1 pushing player 2 right
-                        pushingRight = true;
-                    } else {
-                        pushingRight = false;
-                    }
-                    if (dKeyPressed == true && player2.player2Xpos >= canvas.width - player2.PLAYER2_SIZE) { //player 2 against right wall
-                        p2RW = true;
-                    }
+                if (aKeyPressed == true && player2.player2Xpos <= 0) { //player 2 against left wall
+                    p2LW = true;
+                }
+                if (dKeyPressed == true && player2.player2Xpos >= canvas.width - player2.PLAYER2_SIZE) { //player 2 against right wall
+                    p2RW = true;
+                }
+                //                console.log(p2LW);
+                //                console.log(p2RW);
 
-                    //player 1 stacking
-                    if (player.playerYpos + player.PLAYER_SIZE <= player2.player2Ypos + player2.PLAYER2_SIZE * 0.9) {
-                        player.playerYpos = player2.player2Ypos - player2.PLAYER2_SIZE;
-                        gravity = gravity2;
-                        stacking = true;
-                        pushingLeft = false;
-                        pushingRight = false;
-                    } else {
-                        stacking = false;
-                    }
+                //player 1 stacking
 
-                    if (pushingLeft == true && pushingRight == false && pushing2Left == false && pushing2Right == false && stacking == false && stacking2 == false) {
-                        player2.player2Xpos -= player.playerXspeed / 2;
-                        player.playerXpos += player.playerXspeed / 2;
-                    }
-
-                    if (pushingLeft == false && pushingRight == true && pushing2Left == false && pushing2Right == false && stacking == false && stacking2 == false) {
-                        player2.player2Xpos += player.playerXspeed / 2;
-                        player.playerXpos -= player.playerXspeed / 2;
-                    }
-                } else {
-                    p2RW = false;
-                    stacking = false;
+                if (player.playerYpos + player.PLAYER_SIZE <= player2.player2Ypos + player2.PLAYER2_SIZE * 0.9) {
+                    player.playerYpos = player2.player2Ypos - player2.PLAYER2_SIZE;
+                    gravity = gravity2;
+                    stacking = true;
                     pushingLeft = false;
                     pushingRight = false;
-                } //end of player1 collisions
-
-                if (player.playerXpos + player.PLAYER_SIZE >= player2.player2Xpos && player.playerXpos < player2.player2Xpos + player2.PLAYER2_SIZE && player2.player2Ypos + player2.PLAYER2_SIZE >= player.playerYpos) { // player 2 hitbox
-                    //                player2Collision = true;
-
-                    if (leftKeyPressed == true && player.playerXpos > 0 && player2.player2Xpos <= player.playerXpos + player.PLAYER_SIZE) { //player 2 pushing player 1 left
-                        pushing2Left = true;
-                    } else {
-                        pushing2Left = false;
-                    }
-
-                    if (rightKeyPressed && player.playerXpos < canvas.width - player.PLAYER_SIZE) { //player 2 pushing player 1 right
-                        pushing2Right = true
-                    } else {
-                        pushing2Right = false;
-                    }
-                    //player 2 stacking
-
-                    if (player2.player2Ypos + player2.PLAYER2_SIZE <= player.playerYpos + player.PLAYER_SIZE * 0.1) { // stacking player 2
-                        player2.player2Ypos = player.playerYpos - player.PLAYER_SIZE;
-                        gravity2 = gravity; //makes it so players aren't constantly gaining gravity when stacked and therefore fall off
-                        stacking2 = true;
-                        pushing2Left = false;
-                        pushing2Right = false;
-                    } else {
-                        stacking2 = false;
-                    }
-
-                    if (pushingLeft == false && pushingRight == false && pushing2Left == true && pushing2Right == false && stacking == false && stacking2 == false) {
-                        player.playerXpos -= player2.player2Xspeed / 2;
-                        player2.player2Xpos += player.playerXspeed / 2;
-                    }
-
-                    if (pushingLeft == false && pushingRight == false && pushing2Left == false && pushing2Right == true && stacking == false && stacking2 == false) {
-                        player.playerXpos += player2.player2Xspeed / 2;
-                        player2.player2Xpos -= player.playerXspeed / 2;
-                    }
-
                 } else {
-                    stacking2 = false;
+                    stacking = false;
+                }
+
+                if (pushingLeft == true && pushingRight == false && pushing2Left == false && pushing2Right == false && stacking == false && stacking2 == false) {
+                    player2.player2Xpos -= player.playerXspeed / 2;
+                    player.playerXpos += player.playerXspeed / 2;
+                }
+
+                if (pushingLeft == false && pushingRight == true && pushing2Left == false && pushing2Right == false && stacking == false && stacking2 == false) {
+                    player2.player2Xpos += player.playerXspeed / 2;
+                    player.playerXpos -= player.playerXspeed / 2;
+                }
+            } else {
+                p2LW = false;
+                p2RW = false;
+                stacking = false;
+                pushingLeft = false;
+                pushingRight = false;
+            } //end of player1 collisions
+
+            if (player.playerXpos + player.PLAYER_SIZE >= player2.player2Xpos && player.playerXpos < player2.player2Xpos + player2.PLAYER2_SIZE && player2.player2Ypos + player2.PLAYER2_SIZE >= player.playerYpos) { // player 2 hitbox
+
+                if (leftKeyPressed == true && player.playerXpos > 0 && player2.player2Xpos <= player.playerXpos + player.PLAYER_SIZE) { //player 2 pushing player 1 left
+                    pushing2Left = true;
+                }
+                if (rightKeyPressed && player.playerXpos < canvas.width - player.PLAYER_SIZE) { //player 2 pushing player 1 right
+                    pushing2Right = true
+                }
+
+                if (leftKeyPressed == true && player.playerXpos <= 0) {
+                    p1LW = true;
+                }
+                if (rightKeyPressed == true && player.playerXpos >= canvas.width - player.PLAYER_SIZE) {
+                    p1RW = true;
+                }
+
+                //player 2 stacking
+
+                if (player2.player2Ypos + player2.PLAYER2_SIZE <= player.playerYpos + player.PLAYER_SIZE * 0.1) { // stacking player 2
+                    player2.player2Ypos = player.playerYpos - player.PLAYER_SIZE;
+                    gravity2 = gravity; //makes it so players aren't constantly gaining gravity when stacked and therefore fall off
+                    stacking2 = true;
                     pushing2Left = false;
                     pushing2Right = false;
-                } //player 2 collisions
-
-                if (pushingRight == true && pushing2Left == true || pushing2Right == true && pushingLeft == true && stacking == false && stacking2 == false) {
-                    stopped = true; //both players acting against each other
                 } else {
-                    stopped = false;
+                    stacking2 = false;
                 }
-                if (stopped == true && player.playerXpos + player.PLAYER_SIZE / 2 >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
-                    temp1 = true;
 
-                } else if (stopped == true && player.playerXpos + player.PLAYER_SIZE / 2 <= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
-                    temp2 = true;
-                } else {
-                    temp1 = false;
-                    temp2 = false;
+                if (pushingLeft == false && pushingRight == false && pushing2Left == true && pushing2Right == false && stacking == false && stacking2 == false) {
+                    player.playerXpos -= player2.player2Xspeed / 2;
+                    player2.player2Xpos += player.playerXspeed / 2;
                 }
-            } //end of playerCollisions
 
-            var temp1 = false;
-            var temp2 = false;
+                if (pushingLeft == false && pushingRight == false && pushing2Left == false && pushing2Right == true && stacking == false && stacking2 == false) {
+                    player.playerXpos += player2.player2Xspeed / 2;
+                    player2.player2Xpos -= player.playerXspeed / 2;
+                }
+            } else {
+                p1LW = false;
+                p1RW = false;
+                stacking2 = false;
+                pushing2Left = false;
+                pushing2Right = false;
+            } //player 2 collisions
 
+            if (pushingRight == true && pushing2Left == true || pushing2Right == true && pushingLeft == true && stacking == false && stacking2 == false) {
+                stopped = true; //both players acting against each other
+            } else {
+                stopped = false;
+            }
+            if (stopped == true && player.playerXpos + player.PLAYER_SIZE / 2 >= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
+                temp1 = true;
 
-            function botMove() {
-                if (bot.botXpos > ball.x + ball.radius - 10) {
-                    if (Math.random() < 0.6) {
-                        bot.botXpos -= 3.5;
+            } else if (stopped == true && player.playerXpos + player.PLAYER_SIZE / 2 <= player2.player2Xpos + player2.PLAYER2_SIZE / 2) {
+                temp2 = true;
+            } else {
+                temp1 = false;
+                temp2 = false;
+            }
+        } //end of playerCollisions
+
+        function botMove() {
+            if (easy == true) {
+                balls.forEach(Element => {
+                    if (bot.botXpos > Element.x + Element.radius - 10) {
+                        if (Math.random() < 0.6) {
+                            bot.botXpos -= 3.5;
+                        }
+                    } else {
+                        bot.botXpos += 3.5;
                     }
-                } else {
-                    bot.botXpos += 3.5;
-                }
-                //            if (bot.botYpos > ball.x) {
-                //                if (Math.random() < 0.2) {
-                //                    bot.botYpos -= 4;
-                //                }
-                //            } else {
-                //                if (bot.botXpos < groundYpos) {
-                //                    bot.botYpos += 5;
-                //                }
-                //            }
-                if (bot.botXpos < goalLeft) {
-                    bot.botXpos = canvas.width * 0.75; //resets position if in goal
-                }
-            } //end of BotMove
+                });
+            }
 
-
-            function playerMove() {
-                if (dKeyPressed && player.playerXpos < canvas.width - player.PLAYER_SIZE && p2RW == false && temp2 == false) {
-                    player.playerXpos += player.playerXspeed; // x move right if not outside canvas
-                }
-                if (aKeyPressed && player.playerXpos > 0 && temp1 == false) {
-                    player.playerXpos -= player.playerXspeed; // x move left if not outside canvas
-                }
-            } //end of playerMove
-
-            function player2Move() {
-                if (rightKeyPressed && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE && temp1 == false) {
-                    player2.player2Xpos += player2.player2Xspeed; // x move right if not outside canvas
-                }
-                if (leftKeyPressed && player2.player2Xpos > 0 && temp2 == false) {
-                    player2.player2Xpos -= player2.player2Xspeed; // x move left if  not outside canvas
-                }
-            } //end of player2Move
-
-            function playerGravity() {
-                if (gravity > -60 && player.playerYpos < groundYpos - player.PLAYER_SIZE) {
-                    player.playerYpos += gravity / 5;
-                    gravity += 2;
-                }
-            } //end of gravity
-
-            function player2Gravity() {
-                if (gravity2 > -60 && player2.player2Ypos < groundYpos - player2.PLAYER2_SIZE) {
-                    player2.player2Ypos += gravity2 / 5;
-                    gravity2 += 2;
-                }
-            } //end of gravity2
-
-            function playerJump() {
-                if (wKeyPressed && jumping == false) {
-                    jumping = true;
-                    gravity = jumpForce; //jump speed
-                    player.playerYpos += gravity / 9;
-                    if (stacking == true) {
-                        gravity2 = gravity;
+            if (hard == true) {
+                balls.forEach(Element => {
+                    if (bot.botXpos > Element.x + Element.radius) {
+                        bot.botXpos -= 3.5
                     }
-                }
-                if (player.playerYpos + player.PLAYER_SIZE >= groundYpos && stacking == false) { //cannot jump more if player xpos is greater than the ground line
-                    player.playerYSpeed = 0;
-                    player.playerYpos = groundYpos - player.PLAYER_SIZE; //to stop player sinking through the ground
-                    jumping = false;
-                    gravity = 0;
-                }
-
-            } //end of playerJump
-
-            function player2Jump() {
-                if (upKeyPressed && jumping2 == false) {
-                    jumping2 = true;
-                    gravity2 = jumpForce; //jump force speed    
-                    player2.player2Ypos += gravity2 / 9;
-                    if (stacking2 == true) {
-                        gravity = gravity2;
+                    if (bot.botXpos <= Element.x) {
+                        bot.botXpos += 3.5;
                     }
-                }
-                if (player2.player2Ypos + player2.PLAYER2_SIZE >= groundYpos && stacking2 == false) { //cannot jump more if player xpos is greater than the horizon line
-                    player2.player2YSpeed = 0;
-                    player2.player2Ypos = groundYpos - player2.PLAYER2_SIZE; //to stop player sinking through horizonYpos
-                    jumping2 = false;
-                    gravity2 = 0;
-                }
-            } //end of player2Jump
+                })
+            }
+        } //end of BotMove
 
-            function scoring() {
-                if (ball.x < goalRight && ball.y > goalTop && ball.y < goalBot) { //goal 1
-                    leftGoalScored = true;
+        function playerMove() {
+            if (dKeyPressed && player.playerXpos < canvas.width - player.PLAYER_SIZE && p2RW == false && temp2 == false || stacking == true && dKeyPressed && player.playerXpos < canvas.width - player.PLAYER_SIZE && temp2 == false) {
+                player.playerXpos += player.playerXspeed; // x move right if not outside canvas
+            }
+            if (aKeyPressed && player.playerXpos > 0 && p2LW == false && temp1 == false) {
+                player.playerXpos -= player.playerXspeed; // x move left if not outside canvas
+            }
+        } //end of playerMove
+
+        function player2Move() {
+            if (rightKeyPressed && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE && p1RW == false && temp1 == false || stacking2 == true && rightKeyPressed && player2.player2Xpos < canvas.width - player2.PLAYER2_SIZE && temp1 == false) {
+                player2.player2Xpos += player2.player2Xspeed; // x move right if not outside canvas
+            }
+            if (leftKeyPressed && player2.player2Xpos > 0 && p1LW == false && temp2 == false) {
+                player2.player2Xpos -= player2.player2Xspeed; // x move left if  not outside canvas
+            }
+        } //end of player2Move
+
+        function playerGravity() {
+            if (gravity > -60 && player.playerYpos < groundYpos - player.PLAYER_SIZE) {
+                player.playerYpos += gravity / 5;
+                gravity += 2;
+            }
+        } //end of gravity
+
+        function player2Gravity() {
+            if (gravity2 > -60 && player2.player2Ypos < groundYpos - player2.PLAYER2_SIZE) {
+                player2.player2Ypos += gravity2 / 5;
+                gravity2 += 2;
+            }
+        } //end of gravity2
+
+        function playerJump() {
+            if (wKeyPressed && jumping == false) {
+                jumping = true;
+                gravity = jumpForce; //jump speed
+                player.playerYpos += gravity / 9;
+                if (stacking == true) {
+                    gravity2 = gravity;
+                }
+            }
+            if (player.playerYpos + player.PLAYER_SIZE >= groundYpos && stacking == false) { //cannot jump more if player xpos is greater than the ground line
+                player.playerYSpeed = 0;
+                player.playerYpos = groundYpos - player.PLAYER_SIZE; //to stop player sinking through the ground
+                jumping = false;
+                gravity = 0;
+            }
+
+        } //end of playerJump
+
+        function player2Jump() {
+            if (upKeyPressed && jumping2 == false) {
+                jumping2 = true;
+                gravity2 = jumpForce; //jump force speed    
+                player2.player2Ypos += gravity2 / 9;
+                if (stacking2 == true) {
+                    gravity = gravity2;
+                }
+            }
+            if (player2.player2Ypos + player2.PLAYER2_SIZE >= groundYpos && stacking2 == false) { //cannot jump more if player xpos is greater than the horizon line
+                player2.player2YSpeed = 0;
+                player2.player2Ypos = groundYpos - player2.PLAYER2_SIZE; //to stop player sinking through horizonYpos
+                jumping2 = false;
+                gravity2 = 0;
+            }
+        } //end of player2Jump
+
+        function scoring() {
+
+            //goals coordiantes
+            let goalLeft = 11.5;
+            let goalRight = 105.5;
+
+            let goal2Left = 692.5;
+            let goal2Right = 785.5;
+
+            let goalTop = 347.6;
+            let goalBot = 500;
+
+            balls.forEach(Element => {
+                if (Element.x > goal2Left && Element.y <= goalTop && Element.ballYspeed > 0 && Element.y >= goalTop - Element.radius) { //top bounce of goal right
+                    Element.ballYspeed *= -1;
+                    Element.ballYspeed += 1;
+                } else if (Element.x < goalRight && Element.y <= goalTop && Element.ballYspeed > 0 && Element.y >= goalTop - Element.radius) { //top bounce of goal right
+                    Element.ballYspeed *= -1;
+                    Element.ballYspeed += 1;
+                }
+
+                if (Element.x > goal2Left && Element.y >= goalTop && Element.ballYspeed < 0 && Element.y <= goalTop + Element.radius) { //top bounce of goal right
+                    Element.ballYspeed *= -1;
+                } else if (Element.x < goalRight && Element.y >= goalTop && Element.ballYspeed < 0 && Element.y <= goalTop + Element.radius) { //top bounce of goal right
+                    Element.ballYspeed *= -1;
+                }
+
+                if (Element.x < goalRight && Element.y > goalTop && Element.y < goalBot) { //goal left
                     if (goalScored2 == false) {
                         score2++;
                         goalScored2 = true;
                     }
                     startRestartCount = true;
-                } else {
-                    goalScored2 = false;
                 }
-                if (startRestartCount == true) {
-                    resetCount--;
-                }
-                //            if (resetCount < 70) {
-                //                drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                //                drawText(canvas.width / 2, canvas.height / 3.5, "Goal!", "30px Arial", "rgb(0,0,0,1)", "center");
-                //            }
-                //            if (resetCount <= 0) {
-                //                startRestartCount = false;
-                //                resetGame();
-                //            }
-
-                if (ball.x > goal2Left && ball.y > goalTop && ball.y < goalBot) { //goal 2
-                    rightGoalScored = true;
+                if (Element.x > goal2Left && Element.y > goalTop && Element.y < goalBot) { //goal right
                     if (goalScored == false) {
                         score1++;
                         goalScored = true;
                     }
                     startRestartCount = true;
-                } else {
-                    goalScored = false;
                 }
-                if (startRestartCount == true) {
-                    resetCount--;
-                }
-                if (resetCount < 70) {
-                    drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                    drawText(canvas.width / 2, canvas.height / 3.5, "Goal!", "30px Arial", "rgb(0,0,0,1)", "center");
-                }
-                if (resetCount <= 0) {
-                    startRestartCount = false;
-                    resetGame();
-                }
+            });
+            if (startRestartCount == true) {
+                resetCount--;
+            }
+            if (resetCount < 50) {
+                drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
+                drawText(canvas.width / 2, canvas.height / 3.5, "Goal!", "30px Arial", "rgb(0,0,0,1)", "center");
+            }
+            if (resetCount <= 0) {
+                startRestartCount = false;
+                resetGame();
+                goalScored = false;
+                goalScored2 = false;
+            }
+        } //end of scoring
 
-                if (ball.x > goal2Left && ball.y <= goalTop && ballXspeed > 0) { //top bounce of goal
-                    ballXspeed *= -1;
-                }
-            } //end of scoring
+        function resetGame() { //resets game after goal has been scored
+            balls.forEach(Element => {
+                Element.x = canvas.width / 2;
+                Element.y = canvas.height / 2;
+                Element.ballXspeed = Math.floor(Math.random() * (3 - -1.5)) - 1.5;
+                Element.ballYspeed = 0;
 
-            function resetGame() { //resets game after goal has been scored
-                if (resetCount <= 0) {
-                    resetCount = 70;
-                    startPos1();
-                    startPos2();
-                    ball.x = canvas.width / 2;
-                    ball.y = canvas.height / 2;
-                    ballXspeed = 3.5;
-                    count = 160;
-                    startGameTimer();
-                }
-            } //end of resetGame
+            });
+            resetCount = 50;
+            startPos1();
+            startPos2();
+            count = 160;
+            startGameTimer();
+        } //end of resetGame
 
-            function gameEnd() {
-                if (score1 == 7) { //first to 7 wins
+        function gameEnd() {
+            if (score1 == 7) { //first to 7 wins
+                drawText(canvas.width / 2, canvas.height / 3.5, "Player1 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
+                endGameCount--;
+            }
+            if (score2 == 7) {
+                drawText(canvas.width / 2, canvas.height / 3.5, "Player2 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
+                endGameCount--;
+            } else if (goldenGoal == true) { //golden goal
+                if (score1 == 1) {
                     drawText(canvas.width / 2, canvas.height / 3.5, "Player1 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
                     endGameCount--;
                 }
-                if (score2 == 7) {
+                if (score2 == 1) {
                     drawText(canvas.width / 2, canvas.height / 3.5, "Player2 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
                     endGameCount--;
                 }
-                if (endGameCount <= 0) {
-                    gameFinished = true;
-                }
-                if (gameFinished == true) {
-                    singlePlayer = false;
-                    twoPlayer = false;
-                    mainMenu = true;
-                    gameStart = false;
-                    singlePlayerSelect = false;
-                    twoPlayerSelect = false;
-                    startGame = false;
-                }
-                gameFinished = false;
-            } //end of gameEnd
-
-            function startGameTimer() {
-                if (count >= 0) {
-                    count -= 1;
-                    if (count <= 160 && count >= 110) {
-                        drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
-                        drawText(canvas.width / 2, canvas.height / 3, "3", "30px Arial", "rgb(0,0,0,1)", "center");
-                        drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                    }
-                    if (count <= 110 && count >= 60) {
-                        drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
-                        drawText(canvas.width / 2, canvas.height / 3, "2", "30px Arial", "rgb(0,0,0,1)", "center");
-                        drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-
-                    }
-                    if (count <= 60 && count >= 10) {
-                        drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
-                        drawText(canvas.width / 2, canvas.height / 3, "1", "30px Arial", "rgb(0,0,0,1)", "center");
-                        drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-
-                    }
-                    if (count <= 10 && count >= 0) {
-                        drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
-                    }
-                }
-            } //end of startGameTimer
-
-            function keyPressed(evt) {
-                if (evt.keyCode == LEFT_KEY) {
-                    leftKeyPressed = true;
-                }
-                if (evt.keyCode == RIGHT_KEY) {
-                    rightKeyPressed = true;
-                }
-                if (evt.keyCode == UP_KEY) {
-                    upKeyPressed = true;
-                }
-                if (evt.keyCode == DOWN_KEY) {
-                    downKeyPressed = true;
-                } //player 2
-
-                if (evt.keyCode == A_KEY) {
-                    aKeyPressed = true;
-                }
-                if (evt.keyCode == D_KEY) {
-                    dKeyPressed = true;
-                }
-                if (evt.keyCode == W_KEY) {
-                    wKeyPressed = true;
-                }
-                if (evt.keyCode == S_KEY) {
-                    sKeyPressed = true;
-                } //player 1
-            } //end of keyPressed
-
-            function keyReleased(evt) {
-                if (evt.keyCode == LEFT_KEY) {
-                    leftKeyPressed = false;
-                }
-                if (evt.keyCode == RIGHT_KEY) {
-                    rightKeyPressed = false;
-                }
-                if (evt.keyCode == UP_KEY) {
-                    upKeyPressed = false;
-                }
-                if (evt.keyCode == DOWN_KEY) {
-                    downKeyPressed = false;
-                } //player 2
-
-                if (evt.keyCode == A_KEY) {
-                    aKeyPressed = false;
-                }
-                if (evt.keyCode == D_KEY) {
-                    dKeyPressed = false;
-                }
-                if (evt.keyCode == W_KEY) {
-                    wKeyPressed = false;
-                }
-                if (evt.keyCode == S_KEY) {
-                    sKeyPressed = false;
-                } //player 1
-            } //end of keyReleased
-
-
-            function mouseAction(evt) { //mouse code
-                var rect = canvas.getBoundingClientRect();
-                var root = document.documentElement;
-
-                mouseX = evt.clientX - rect.left - root.scrollLeft;
-                mouseY = evt.clientY - rect.top - root.scrollTop;
-
-                return {
-                    x: mouseX,
-                    y: mouseY
-                }
-            } //end of mouseAction
-
-            document.body.onmousedown = function() {
-                ++mouseDown;
             }
-            document.body.onmouseup = function() {
-                --mouseDown;
+            if (endGameCount <= 0) {
+                gameFinished = true;
             }
+            if (gameFinished == true) {
+                score1 = 0;
+                score2 = 0;
+                singlePlayer = false;
+                twoPlayer = false;
+                gameStart = false;
+                singlePlayerSelect = false;
+                twoPlayerSelect = false;
+                startGame = false;
+                mainMenu = true;
+            }
+            gameFinished = false;
+        } //end of gameEnd
 
-            function colorRect(x, y, w, h, c) {
-                ctx.fillStyle = c;
-                ctx.fillRect(x, y, w, h);
-            } //end of colorRect
+        var startOfGame = true;
 
-            function drawText(x, y, t, f, c, d) {
-                ctx.fillStyle = c;
-                ctx.textAlign = d;
-                ctx.font = f;
-                ctx.fillText(t, x, y);
-            } //end of drawText
+        function startGameTimer() {
+            if (count >= 0) {
+                count -= 1;
+                if (count <= 160 && count >= 110) {
+                    drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
+                    drawText(canvas.width / 2, canvas.height / 3, "3", "30px Arial", "rgb(0,0,0,1)", "center");
+                    drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
+                    if (startOfGame == true && firstToSeven == true) {
+                        drawText(canvas.width / 2, canvas.height - 30, "First to seven wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                    }
+                }
+                if (count <= 110 && count >= 60) {
+                    drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
+                    drawText(canvas.width / 2, canvas.height / 3, "2", "30px Arial", "rgb(0,0,0,1)", "center");
+                    drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
+                    if (startOfGame == true && firstToSeven == true) {
+                        drawText(canvas.width / 2, canvas.height - 30, "First to seven wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                    }
+                }
+                if (count <= 60 && count >= 10) {
+                    drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
+                    drawText(canvas.width / 2, canvas.height / 3, "1", "30px Arial", "rgb(0,0,0,1)", "center");
+                    drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
+                    if (startOfGame == true && firstToSeven == true) {
+                        drawText(canvas.width / 2, canvas.height - 30, "First to seven wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                    }
+                }
+                if (count <= 10 && count >= 0) {
+                    drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
+                    startOfGame = false;
+                }
+            }
+        } //end of startGameTimer
 
-            function drawPlayer(src, x, y, w, h) {
-                ctx.drawImage(imgs.player1, player.playerXpos, player.playerYpos, player.PLAYER_SIZE, player.PLAYER_SIZE);
-            } //end of drawPlayer
+        function keyPressed(evt) {
+            if (evt.keyCode == LEFT_KEY) {
+                leftKeyPressed = true;
+            }
+            if (evt.keyCode == RIGHT_KEY) {
+                rightKeyPressed = true;
+            }
+            if (evt.keyCode == UP_KEY) {
+                upKeyPressed = true;
+            }
+            if (evt.keyCode == DOWN_KEY) {
+                downKeyPressed = true;
+            } //player 2
 
-            function drawPlayer2(src, x, y, w, h) {
-                ctx.drawImage(imgs.player2, player2.player2Xpos, player2.player2Ypos, player2.PLAYER2_SIZE, player2.PLAYER2_SIZE);
-            } //end of drawPlayer2
+            if (evt.keyCode == A_KEY) {
+                aKeyPressed = true;
+            }
+            if (evt.keyCode == D_KEY) {
+                dKeyPressed = true;
+            }
+            if (evt.keyCode == W_KEY) {
+                wKeyPressed = true;
+            }
+            if (evt.keyCode == S_KEY) {
+                sKeyPressed = true;
+            } //player 1
 
-            function drawBot(x, y, w, h, c) {
-                ctx.fillStyle = 'yellow';
-                ctx.fillRect(bot.botXpos, bot.botYpos, bot.BOT_SIZE, bot.BOT_SIZE);
-            } //end of drawBot
+            //username function
 
-            function drawGround(x, y, w, h, c) {
-                ctx.fillStyle = '#48892e';
-                ctx.fillRect(groundXpos, groundYpos, groundLength, groundLength);
-            } //end of drawGround
+            //            if (nameBoxClicked == true && singlePlayerSelect == true || twoPlayerSelect == true) { //when player clicks in rectangle box and either of the menu screens are open
+            //                if (evt.keyCode > 0) { //runs if a key is pressed
+            //                    console.log('typing');
+            //                    let maxWords = canvas.width / 15 * 2; //limits how much you can write
+            //                    if (name[attempt].length == 0) { //if theres no word yet
+            //                        if (evt.keyCode == 8) { //if delete/backspace is pressed
+            //                            name[attempt].pop(); //delete last letter
+            //                        } else if (evt.keyCode == 13) { //enter key pressed
+            //                            nameBoxClicked == false; //closes further typing
+            //                        } else if (shiftKeyPressed == true && evt.keyCode !== 16) { //if shift key is pressed
+            //                            name[attempt].push(String.fromCharCode(evt.keyCode)); //push letter in caps
+            //                        } else if (evt.keyCode !== 16) { //if shift not pressed
+            //                            name[attempt].push(String.fromCharCode(evt.keyCode).toLowerCase()); //writes letter in lowercase
+            //                        }
+            //                    } else {
+            //                        if (evt.keyCode == 8) { //delete pressed
+            //                            if (name[attempt][0].length == 1) { //if there is only one ltter in name
+            //                                name[attempt][0] = ""; //will become nothing
+            //                            } else if (name[attempt][0].length !== 0) { //if there is more than one letter
+            //                                backSpaceContainer = name[attempt][0][0]; //backSpaceContainer will be the first letter in name
+            //                                for (let l = 1; l < name[attempt][0][1].length - 1; l++) { //runs for every letter in the name instead of first and last
+            //                                    backSpaceContainer += name[attempt][0][1]; //pushes every letter expect first and last
+            //                                } //end of for statement
+            //                                name[attempt][0] = backSpaceContainer; //will have one less letter
+            //                            }
+            //                        } else if (evt.keyCode == 13) {
+            //                            nameBoxClicked = false;
+            //                        } else if (shiftKeyPressed == true && evt.keyCode !== 16 && ctx.measureText((name[attempt][0])).width <= maxWords) { //if shift key is pressed it checks if there is still space
+            //                            name[attempt][0] += (String.fromCharCode(evt.keyCode)); //adds capital letter
+            //                        } else if (evt.keyCode !== 16 && ctx.measureText((name[attempt][0])).width <= maxWords) { //if shift key is not pressed and there is space
+            //                            name[attempt][0] += (String.fromCharCode(evt.keyCode).toLowerCase()); //adds lowercase letter
+            //                        }
+            //                    }
+            //                }
+            //            }
 
-            function drawBall(x, y, w, h, c) {
-                ctx.beginPath();
-                ctx.arc(ball.x, ball.y, ball.radius, 0, 2 * Math.PI);
-                ctx.fillStyle = 'white';
-                ctx.fill();
-                ctx.closePath();
-            } //end of drawBall
+        } //end of keyPressed
 
-            function drawImage(src, x, y, w, h) {
-                ctx.drawImage(src, x, y, w, h);
-            } //end of drawImage
+        function keyReleased(evt) {
+            if (evt.keyCode == LEFT_KEY) {
+                leftKeyPressed = false;
+            }
+            if (evt.keyCode == RIGHT_KEY) {
+                rightKeyPressed = false;
+            }
+            if (evt.keyCode == UP_KEY) {
+                upKeyPressed = false;
+            }
+            if (evt.keyCode == DOWN_KEY) {
+                downKeyPressed = false;
+            } //player 2
 
-            function hoverButton1(x, y, w, h, c) {
-                colorRect(buttonXposLeft, buttonYposTop, (buttonXposRight - buttonXposLeft), (buttonYposBot - buttonYposTop), 'rgb(0,0,0,0.2)');
-            } //end of hoverButton1
+            if (evt.keyCode == A_KEY) {
+                aKeyPressed = false;
+            }
+            if (evt.keyCode == D_KEY) {
+                dKeyPressed = false;
+            }
+            if (evt.keyCode == W_KEY) {
+                wKeyPressed = false;
+            }
+            if (evt.keyCode == S_KEY) {
+                sKeyPressed = false;
+            } //player 1
+        } //end of keyReleased
 
-            function hoverButton2(x, y, w, h, c) {
-                colorRect(buttonXposLeft, button2YposTop, (buttonXposRight - buttonXposLeft), (button2YposBot - button2YposTop), 'rgb(0,0,0,0.2)');
-            } //end of hoverButtons2
+        function mouseAction(evt) { //mouse code
+            var rect = canvas.getBoundingClientRect();
+            var root = document.documentElement;
 
-            function hoverButton3(x, y, w, h, c) {
-                colorRect(buttonXposLeft, button3YposTop, (buttonXposRight - buttonXposLeft), (button3YposBot - button3YposTop), 'rgb(0,0,0,0.2)');
-            } //end of hoverButton3
+            mouseX = evt.clientX - rect.left - root.scrollLeft;
+            mouseY = evt.clientY - rect.top - root.scrollTop;
 
-            function hoverStartButton(x, y, w, h, c) {
-                colorRect(startButtonLeft, startButtonTop, (startButtonRight - startButtonLeft), (startButtonBot - startButtonTop), 'rgb(0,0,0,0.2)');
-            } //end of hoverStartButton
+            return {
+                x: mouseX,
+                y: mouseY
+            }
+        } //end of mouseAction
 
-            function hoverBackButton(x, y, w, h, c) {
-                colorRect(backButtonLeft, backButtonTop, (backButtonRight - backButtonLeft), (backButtonBot - backButtonTop), 'rgb(0,0,0,0.2)');
-            } //end of hoverStartButton
+        document.body.onmousedown = function() {
+            ++mouseDown;
+        }
+        document.body.onmouseup = function() {
+            --mouseDown;
+        }
+
+        function colorRect(x, y, w, h, c) {
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, w, h);
+        } //end of colorRect
+
+        function drawText(x, y, t, f, c, d) {
+            ctx.fillStyle = c;
+            ctx.textAlign = d;
+            ctx.font = f;
+            ctx.fillText(t, x, y);
+        } //end of drawText
+
+        function drawPlayer(src, x, y, w, h) {
+            ctx.drawImage(imgs.player1, player.playerXpos, player.playerYpos, player.PLAYER_SIZE, player.PLAYER_SIZE);
+        } //end of drawPlayer
+
+        function drawPlayer2(src, x, y, w, h) {
+            ctx.drawImage(imgs.player2, player2.player2Xpos, player2.player2Ypos, player2.PLAYER2_SIZE, player2.PLAYER2_SIZE);
+        } //end of drawPlayer2
+
+        function drawBot(src, x, y, w, h) {
+            ctx.drawImage(imgs.bot, bot.botXpos, bot.botYpos, bot.BOT_SIZE, bot.BOT_SIZE);
+        } //end of drawBot
+
+        function drawGround(x, y, w, h, c) {
+            ctx.fillStyle = '#48892e';
+            ctx.fillRect(groundXpos, groundYpos, groundLength, groundLength);
+        } //end of drawGround
+
+        function drawBall(x, y, r, c) {
+            ctx.beginPath();
+            ctx.arc(x, y, r, 0, 2 * Math.PI);
+            ctx.fillStyle = c;
+            ctx.fill();
+            ctx.closePath();
+        } //end of drawBall
+
+        function drawImage(src, x, y, w, h) {
+            ctx.drawImage(src, x, y, w, h);
+        } //end of drawImage
 
     </script>
 </body>
