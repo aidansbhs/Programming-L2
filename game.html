@@ -38,9 +38,6 @@
                 var mousePos = mouseAction(evt);
                 mouseX = mousePos.x;
                 mouseY = mousePos.y;
-
-                //                                                                console.log(mouseX);
-                //                console.log(mouseY);
             });
         }
 
@@ -134,6 +131,7 @@
         var twoPlayer = false;
         var gameFinished = false;
         var startGame = false;
+        var startOfGame = true;
         var count = -1;
         var score1 = 0;
         var score2 = 0;
@@ -146,15 +144,19 @@
         var resetCount = 50;
         var endGameCount = 110;
         var balls = [];
+
         var goldenGoal = false;
         var twoBalls = false;
         var firstToSeven = true;
-        var timed = false;
         var regular = true;
-        //        var bigGoal = false;
-        //        var smallGoal = false;
-        var easy = true;
-        var hard = false;
+
+        var gamemodes = ['First to Seven', 'Golden Goal'];
+        var gamemodesCount = 0;
+        var gameVariants = ['Regular', 'Two Balls'];
+        var gameVariantsCount = 0;
+        var gameDifficulty = ['Easy', 'Hard'];
+        var difficultyCount = 0;
+        var buttonTest = false;
 
         // menu buttons
         var mainMenu = true;
@@ -163,28 +165,17 @@
         var instructionsSelect = false;
         var backButtonClicked = false;
 
-        //for the username function
-        //        var nameBoxClicked = false;
-        //        var name = [
-        //            ['Naruto'],
-        //            []
-        //        ];
-        //        var backSpaceContainer;
-        //        var attempt = 1;
-
-
-        //prompts
-//        var maxLength = 12;
-//
-//        var name = prompt("What is your name?", 'Naruto') //prompt asks for user name
-//        while (name.length < 2 || name.length > maxLength || name == 'null') {
-//            alert("Please type a valid name"); //if the user types a name that is less than 2 characters or doesn't type anything it will reprompt them 
-//            name = prompt("What's your name?");
-//        }
-//        var difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy'); //asks user for what difficulty they want 
-//        while (difficulty !== 'easy' && difficulty !== 'hard') { // if the users response is not easy or hard, it will prompt them again 
-//            difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy');
-//        }
+        //prompts 
+        var maxLength = 15;
+        var name = prompt("What is your name?", 'Naruto') //prompt asks for user name
+        while (name.length < 2 || name.length > maxLength || name == 'null') {
+            alert("Please type a valid name"); //if the user types a name that is less than 2 characters or doesn't type anything it will reprompt them 
+            name = prompt("What's your name?");
+        }
+        //        var difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy'); //asks user for what difficulty they want 
+        //        while (difficulty !== 'easy' && difficulty !== 'hard') { // if the users response is not easy or hard, it will prompt them again 
+        //            difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy');
+        //        }
 
         function mainloop() {
             if (mainMenu == false) {
@@ -221,19 +212,6 @@
                 } else if (instructionsSelect == true) {
                     instructionSelection();
                 }
-
-                //user name function - drawing on canvas
-                //                if (nameBoxClicked == true) {
-                //                    if (name[attempt].length >= 1) {
-                //                        drawText(canvas.width / 2, canvas.height / 2, name, "15px Arial", "rgb(255,255,255,1)", "left"); //draws text from players input
-                //                    }
-                //                } else if (nameBoxClicked == false && gameStart == true && name[attempt].length <= 0) { //if player didn't write anything
-                //                    name[attempt][0] = 'player1'; //sets emepty player name to player1
-                //                } else {
-                //                    if (name[attempt][0].length <= 0) { //if they wrote something then deleted all of it
-                //                        name[attempt][0] = 'player1'; //sets it to player1
-                //                    }
-                //                }
             }
         } //end of mainloop
 
@@ -329,6 +307,7 @@
             }
         } //end of menuButtons
 
+
         function singlePlayerSelection() {
 
             //name box coordinates
@@ -350,64 +329,55 @@
             drawImage(imageAssets.singlePlayerSelection, 0, 0, canvas.width, canvas.height);
             backButton();
 
-            drawText(370, 223, name, "16px Arial", "rgb(255,255,255,1)", "center");
-
-            //name box
-
-            //            if (mouseX >= nameBoxLeft && mouseX <= nameBoxRight && mouseY >= nameBoxTop && mouseY <= nameBoxBot) { //dimensions of name box 
-            //                colorRect(nameBoxLeft, nameBoxTop, (nameBoxRight - nameBoxLeft), (nameBoxBot - nameBoxTop), 'rgb(255,255,255,0.2)'); //hover
-            //                if (mouseDown) { //clicks
-            //                    nameBoxClicked = true;
-            //                }
-            //            }
+            drawText(370, 223, name, "14px Arial", "rgb(255,255,255,1)", "center");
 
             if (mouseX >= difficultyLeft && mouseX <= difficultyRight && mouseY >= difficultyTop && mouseY <= difficultyBot) {
                 colorRect(difficultyLeft, difficultyTop, (difficultyRight - difficultyLeft), (difficultyBot - difficultyTop), 'rgb(255,255,255,0.2)');
                 if (mouseDown) {
-                    hard = true;
-                    easy = false;
+                    if (buttonTest == false) { //fixes holding down mouse
+                        buttonTest = true;
+                        difficultyCount++;
+                        if (difficultyCount >= gameDifficulty.length) {
+                            difficultyCount = 0;
+                        }
+                    }
                 } else {
-                    easy = true;
-                    hard = false;
+                    buttonTest = false;
                 }
             }
-            if (easy == true) {
-                drawText(227, 341, "Easy", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
-            if (hard == true) {
-                drawText(227, 341, "Hard", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
+
+            console.log(gameDifficulty[difficultyCount]);
+
+            drawText(225, 341, gameDifficulty[difficultyCount], "16px Arial", "rgb(0,0,0,1)", "center");
 
             if (mouseX >= gameplayLeft && mouseX <= gameplayRight && mouseY >= gameplayTop && mouseY <= gameplayBot) {
                 colorRect(gameplayLeft, gameplayTop, (gameplayRight - gameplayLeft), (gameplayBot - gameplayTop), 'rgb(255,255,255,0.2)');
                 if (mouseDown) {
-                    regular = false;
-                    twoBalls = true;
+                    if (buttonTest == false) {
+                        buttonTest = true;
+                        gamemodesCount++;
+                        if (gamemodesCount >= gamemodes.length) {
+                            gamemodesCount = 0;
+                        }
+                    }
                 } else {
-                    regular = true;
-                    twoBalls = false;
+                    buttonTest = false;
                 }
             }
-            if (regular == true) {
-                drawText(520, 340, "Regular", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
-            if (twoBalls == true) {
-                drawText(525, 340, "Two Balls", "16px Arial", "rgb(0,0,0,1)", "center");
-                if (gameStart == true) {
-                    makeBall();
-                }
-            }
+
+            drawText(535, 340, gamemodes[gamemodesCount], "16px Arial", "rgb(0,0,0,1)", "center");
+
         } //end of singlePlayerSelection
 
         function twoPlayerSelection() { // when twoPlayerSelect equals true run this
 
-            let squareLeft = 318.5;
-            let squareRight = 337;
-            let squareTop = 325.6;
-            let sqaureBot = 344.6;
+            let squareLeft = 311.5;
+            let squareRight = 329;
+            let squareTop = 268.5;
+            let sqaureBot = 288.6;
 
-            let square2Top = 354;
-            let square2Bot = 374;
+            let square2Top = 298;
+            let square2Bot = 317.6;
 
 
             drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
@@ -416,32 +386,37 @@
             if (mouseX >= squareLeft && mouseX <= squareRight && mouseY >= squareTop && mouseY <= sqaureBot) { //sqaure 1
                 colorRect(squareLeft, squareTop, (squareRight - squareLeft), (sqaureBot - squareTop), 'rgb(255,255,255,0.2)');
                 if (mouseDown) {
-                    firstToSeven = false;
-                    goldenGoal = true;
+                    if (buttonTest == false) {
+                        buttonTest = true;
+                        gamemodesCount++;
+                        if (gamemodesCount >= gamemodes.length) {
+                            gamemodesCount = 0;
+                        }
+                    }
+                } else {
+                    buttonTest = false;
                 }
             }
+
+            drawText(390, 283, gamemodes[gamemodesCount], "16px Arial", "rgb(0,0,0,1)", "center");
+
 
             if (mouseX >= squareLeft && mouseX <= squareRight && mouseY >= square2Top && mouseY <= square2Bot) { //sqaure 2
                 colorRect(squareLeft, square2Top, (squareRight - squareLeft), (square2Bot - square2Top), 'rgb(255,255,255,0.2)');
                 if (mouseDown) {
-                    regular = false;
-                    twoBalls = true;
+                    if (buttonTest == false) {
+                        buttonTest = true;
+                        gameVariantsCount++;
+                        if (gameVariantsCount >= gameVariants.length) {
+                            gameVariantsCount = 0;
+                        }
+                    }
+                } else {
+                    buttonTest = false;
                 }
             }
-            if (firstToSeven == true) {
-                drawText(390, 340, "First to Seven", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
 
-            if (goldenGoal == true) {
-                drawText(387, 340, "Golden Goal", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
-
-            if (regular == true) {
-                drawText(370, 370, "Regular", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
-            if (twoBalls == true) {
-                drawText(378, 370, "Two Balls", "16px Arial", "rgb(0,0,0,1)", "center");
-            }
+            drawText(372, 314, gameVariants[gameVariantsCount], "16px Arial", "rgb(0,0,0,1)", "center");
         } //end of twoPlayerSelection
 
         function instructionSelection() {
@@ -570,7 +545,31 @@
                     if (Element.ballYspeed < 0 && Element.ballYspeed > -2.2) { //do this otherwise, ball never stops bouncing
                         Element.ballYspeed = 0;
                     }
-                    ballFriction(); //apply friction
+                    if (Math.abs(Element.ballXspeed) > minBallXspeed) { //apply friction if ball speed is bigger than this
+                        if (Element.ballXspeed > 0) {
+                            Element.ballXspeed = Element.ballXspeed - friction;
+                        } else if (Element.ballXspeed < 0) {
+                            Element.ballXspeed = Element.ballXspeed + friction;
+                        }
+                    } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 2) { //stages of friction
+                        if (Element.ballXspeed > 0) {
+                            Element.ballXspeed = Element.ballXspeed - friction / 4;
+                        } else if (Element.ballXspeed < 0) {
+                            Element.ballXspeed = Element.ballXspeed + friction / 4;
+                        }
+                    } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 4) { //gets less as ball speed decreases
+                        if (Element.ballXspeed > 0) {
+                            Element.ballXspeed = Element.ballXspeed - friction / 8;
+                        } else if (Element.ballXspeed < 0) {
+                            Element.ballXspeed = Element.ballXspeed + friction / 8;
+                        }
+                    } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 8) {
+                        if (Element.ballXspeed > 0) {
+                            Element.ballXspeed = Element.ballXspeed - friction / 16;
+                        } else if (Element.ballXspeed < 0) {
+                            Element.ballXspeed = Element.ballXspeed + friction / 16;
+                        }
+                    }
                 }
                 if (Element.x > canvas.width - Element.radius && Element.ballXspeed > 0) { //right edge bounce
                     Element.ballXspeed *= -1;
@@ -580,36 +579,6 @@
                 }
             });
         } //end of ballMove
-
-        function ballFriction() {
-            balls.forEach(Element => {
-                if (Math.abs(Element.ballXspeed) > minBallXspeed) { //apply friction if ball speed is bigger than this
-                    if (Element.ballXspeed > 0) {
-                        Element.ballXspeed = Element.ballXspeed - friction;
-                    } else if (Element.ballXspeed < 0) {
-                        Element.ballXspeed = Element.ballXspeed + friction;
-                    }
-                } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 2) { //stages of friction
-                    if (Element.ballXspeed > 0) {
-                        Element.ballXspeed = Element.ballXspeed - friction / 4;
-                    } else if (Element.ballXspeed < 0) {
-                        Element.ballXspeed = Element.ballXspeed + friction / 4;
-                    }
-                } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 4) { //gets less as ball speed decreases
-                    if (Element.ballXspeed > 0) {
-                        Element.ballXspeed = Element.ballXspeed - friction / 8;
-                    } else if (Element.ballXspeed < 0) {
-                        Element.ballXspeed = Element.ballXspeed + friction / 8;
-                    }
-                } else if (Math.abs(Element.ballXspeed) > minBallXspeed / 8) {
-                    if (Element.ballXspeed > 0) {
-                        Element.ballXspeed = Element.ballXspeed - friction / 16;
-                    } else if (Element.ballXspeed < 0) {
-                        Element.ballXspeed = Element.ballXspeed + friction / 16;
-                    }
-                }
-            });
-        } //end of ballFriction
 
         function ballCollisions() {
             balls.forEach(Element => {
@@ -645,7 +614,7 @@
                     Element.ballRandomTest1 = false;
                 } //end of player 1 collisions with ball
 
-                if (Element.x - Element.radius <= player2.player2Xpos + player2.PLAYER2_SIZE && Element.x + Element.radius >= player2.player2Xpos && Element.y <= player2.player2Ypos + player2.PLAYER2_SIZE && Element.y + Element.radius >= player2.player2Ypos) { //player 2 hitbox when it touches ball
+                if (Element.x - Element.radius <= player2.player2Xpos + player2.PLAYER2_SIZE && Element.x + Element.radius >= player2.player2Xpos && Element.y <= player2.player2Ypos + player2.PLAYER2_SIZE && Element.y + Element.radius >= player2.player2Ypos && twoPlayer == true) { //player 2 hitbox when it touches ball
 
                     if (rightKeyPressed == false && leftKeyPressed == false && Element.ballRandomTest2 == false) {
                         if (gravity2 >= 4) {
@@ -679,18 +648,9 @@
 
                 if (Element.x - Element.radius <= bot.botXpos + bot.BOT_SIZE && Element.x + Element.radius >= bot.botXpos && Element.y <= bot.botYpos + bot.BOT_SIZE && Element.y + Element.radius >= bot.botYpos) { //player 2 hitbox when it touches ball
 
-                    if (rightKeyPressed == false && leftKeyPressed == false) {
-                        Element.ballXspeed *= -1;
-                    } else {
-                        if (Element.x < bot.botXpos + bot.BOT_SIZE / 2) {
-                            Element.ballXspeed = -kickspeed;
-                        }
-                        if (Element.x >= bot.botXpos + bot.BOT_SIZE / 2) {
-                            Element.ballXspeed = kickspeed;
-                        } //if ball inside player it will go outwards in the right direction
-                    }
-                    Element.ballYspeed = gravity2 / 5 - 1; //how high the ball goes when player 2 hits it in the y direction
+                    Element.ballXspeed = -kickspeed;
                 }
+                //                Element.ballYspeed = gravity2 / 5 - 2; //how high the ball goes when player 2 hits it in the y direction   
             });
         } //end of ball Collisions
 
@@ -710,8 +670,6 @@
                 if (dKeyPressed == true && player2.player2Xpos >= canvas.width - player2.PLAYER2_SIZE) { //player 2 against right wall
                     p2RW = true;
                 }
-                //                console.log(p2LW);
-                //                console.log(p2RW);
 
                 //player 1 stacking
 
@@ -804,27 +762,49 @@
         } //end of playerCollisions
 
         function botMove() {
-            if (easy == true) {
-                balls.forEach(Element => {
-                    if (bot.botXpos > Element.x + Element.radius - 10) {
-                        if (Math.random() < 0.6) {
-                            bot.botXpos -= 3.5;
-                        }
-                    } else {
-                        bot.botXpos += 3.5;
-                    }
-                });
-            }
+//            if (difficultyCount[0]) {
+//                balls.forEach(Element => {
+//                    if (bot.botXpos > Element.x + Element.radius - 10) {
+//                        if (Math.random() < 0.6) {
+//                            bot.botXpos -= 3.5;
+//                        }
+//                    } else {
+//                        bot.botXpos += 3.5;
+//                    }
+//                });
+//            }
 
-            if (hard == true) {
+            if (difficultyCount[1]) {
+                let container = [];
+                let count = 0;
                 balls.forEach(Element => {
-                    if (bot.botXpos > Element.x + Element.radius) {
-                        bot.botXpos -= 3.5
+                    count++;
+                    let tempx = JSON.parse(JSON.stringify(Element.x));
+                    let tempy = JSON.parse(JSON.stringify(Element.y));
+                    let tempballYspeed = JSON.parse(JSON.stringify(Element.ballYspeed));
+                    let tempballXspeed = JSON.parse(JSON.stringify(Element.ballXspeed));
+
+                    while (tempy <= canvas.height / 6 * 4) {
+                        tempy += tempballYspeed;
+                        tempballYspeed += Element.ballGravity;
+                        tempx += 5;
                     }
-                    if (bot.botXpos <= Element.x) {
-                        bot.botXpos += 3.5;
-                    }
-                })
+                    container.push([tempx, count - 1]);
+                });
+                let container2 = JSON.parse(JSON.stringify(container));
+                container.forEach(Element => {
+                    Element[0] = Math.abs(Element[0] - bot.botXpos);
+                });
+                if (container.length >= 2) {
+                    container.sort(function(a, b) {
+                        return a[0] - b[0]
+                    });
+                }
+                if (container2[container[0][1]][0] <= bot.botXpos) {
+                    bot.botXpos -= bot.botXspeed;
+                } else if (container2[container[0][1]][0] >= bot.botXpos) {
+                    bot.botXpos += bot.botXspeed;
+                }
             }
         } //end of BotMove
 
@@ -900,10 +880,8 @@
             //goals coordiantes
             let goalLeft = 11.5;
             let goalRight = 105.5;
-
             let goal2Left = 692.5;
             let goal2Right = 785.5;
-
             let goalTop = 347.6;
             let goalBot = 500;
 
@@ -963,6 +941,7 @@
             resetCount = 50;
             startPos1();
             startPos2();
+            startPos3();
             count = 160;
             startGameTimer();
         } //end of resetGame
@@ -998,11 +977,73 @@
                 twoPlayerSelect = false;
                 startGame = false;
                 mainMenu = true;
-            }
-            gameFinished = false;
-        } //end of gameEnd
+                gameFinished = true;
 
-        var startOfGame = true;
+                gravity = 0.1;
+                gravity2 = 0.1;
+                bounce = 0.6;
+                friction = 0.1;
+                jumpForce = -30;
+                jumping = false;
+                jumping2 = false;
+                kickspeed = 4.5;
+                normalSpeed = 3.5;
+                stacking = false;
+                stacking2 = false;
+                pushingRight = false;
+                pushingLeft = false
+                pushing2Left = false;
+                pushing2Right = false;
+                stopped = false
+                p1LW = false;
+                p1RW = false;
+                p2LW = false;
+                p2RW = false;
+                temp1 = false;
+                temp2 = false;
+                minBallXspeed = 1.5;
+
+                //game variables
+                mouseX, mouseY;
+                mouseDown = 0;
+                startingPos = true;
+                startingPos2 = true;
+                startingPos3 = true;
+                gameStart = false;
+                singlePlayer = false;
+                twoPlayer = false;
+                gameFinished = false;
+                startGame = false;
+                startOfGame = true;
+                count = -1;
+                score1 = 0;
+                score2 = 0;
+                leftGoalScored = false;
+                rightGoalScored = false;
+                goalScored = false;
+                goalScored2 = false;
+                startRestartCount = false;
+                reset = false;
+                resetCount = 50;
+                endGameCount = 110;
+                balls = [];
+                goldenGoal = false;
+                twoBalls = false;
+                firstToSeven = true;
+                regular = true;
+                makeBall();
+
+                // menu buttons
+                mainMenu = true;
+                singlePlayerSelect = false;
+                twoPlayerSelect = false;
+                instructionsSelect = false;
+                backButtonClicked = false;
+
+
+
+            }
+        } //end of gameEnd
 
         function startGameTimer() {
             if (count >= 0) {
@@ -1064,53 +1105,24 @@
             if (evt.keyCode == S_KEY) {
                 sKeyPressed = true;
             } //player 1
-
-            //username function
-
-            //            if (nameBoxClicked == true && singlePlayerSelect == true || twoPlayerSelect == true) { //when player clicks in rectangle box and either of the menu screens are open
-            //                if (evt.keyCode > 0) { //runs if a key is pressed
-            //                    console.log('typing');
-            //                    let maxWords = canvas.width / 15 * 2; //limits how much you can write
-            //                    if (name[attempt].length == 0) { //if theres no word yet
-            //                        if (evt.keyCode == 8) { //if delete/backspace is pressed
-            //                            name[attempt].pop(); //delete last letter
-            //                        } else if (evt.keyCode == 13) { //enter key pressed
-            //                            nameBoxClicked == false; //closes further typing
-            //                        } else if (shiftKeyPressed == true && evt.keyCode !== 16) { //if shift key is pressed
-            //                            name[attempt].push(String.fromCharCode(evt.keyCode)); //push letter in caps
-            //                        } else if (evt.keyCode !== 16) { //if shift not pressed
-            //                            name[attempt].push(String.fromCharCode(evt.keyCode).toLowerCase()); //writes letter in lowercase
-            //                        }
-            //                    } else {
-            //                        if (evt.keyCode == 8) { //delete pressed
-            //                            if (name[attempt][0].length == 1) { //if there is only one ltter in name
-            //                                name[attempt][0] = ""; //will become nothing
-            //                            } else if (name[attempt][0].length !== 0) { //if there is more than one letter
-            //                                backSpaceContainer = name[attempt][0][0]; //backSpaceContainer will be the first letter in name
-            //                                for (let l = 1; l < name[attempt][0][1].length - 1; l++) { //runs for every letter in the name instead of first and last
-            //                                    backSpaceContainer += name[attempt][0][1]; //pushes every letter expect first and last
-            //                                } //end of for statement
-            //                                name[attempt][0] = backSpaceContainer; //will have one less letter
-            //                            }
-            //                        } else if (evt.keyCode == 13) {
-            //                            nameBoxClicked = false;
-            //                        } else if (shiftKeyPressed == true && evt.keyCode !== 16 && ctx.measureText((name[attempt][0])).width <= maxWords) { //if shift key is pressed it checks if there is still space
-            //                            name[attempt][0] += (String.fromCharCode(evt.keyCode)); //adds capital letter
-            //                        } else if (evt.keyCode !== 16 && ctx.measureText((name[attempt][0])).width <= maxWords) { //if shift key is not pressed and there is space
-            //                            name[attempt][0] += (String.fromCharCode(evt.keyCode).toLowerCase()); //adds lowercase letter
-            //                        }
-            //                    }
-            //                }
-            //            }
-
         } //end of keyPressed
 
         function keyReleased(evt) {
             if (evt.keyCode == LEFT_KEY) {
                 leftKeyPressed = false;
+                stopped = false;
+                temp1 = false;
+                temp2 = false;
+                pushingLeft = false;
+                pushingRight = false;
             }
             if (evt.keyCode == RIGHT_KEY) {
                 rightKeyPressed = false;
+                stopped = false;
+                temp1 = false;
+                temp2 = false;
+                pushingLeft = false;
+                pushingRight = false;
             }
             if (evt.keyCode == UP_KEY) {
                 upKeyPressed = false;
@@ -1121,9 +1133,19 @@
 
             if (evt.keyCode == A_KEY) {
                 aKeyPressed = false;
+                stopped = false;
+                temp1 = false;
+                temp2 = false;
+                pushing2Left = false;
+                pushing2Right = false;
             }
             if (evt.keyCode == D_KEY) {
                 dKeyPressed = false;
+                stopped = false;
+                temp1 = false;
+                temp2 = false;
+                pushing2Left = false;
+                pushing2Right = false;
             }
             if (evt.keyCode == W_KEY) {
                 wKeyPressed = false;
