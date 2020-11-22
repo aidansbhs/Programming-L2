@@ -144,12 +144,9 @@
         var resetCount = 50;
         var endGameCount = 110;
         var balls = [];
-
-        var goldenGoal = false;
-        var twoBalls = false;
-        var firstToSeven = true;
-        var regular = true;
-
+        var runOnce = true;
+        
+        //difficulty and game type
         var gamemodes = ['First to Seven', 'Golden Goal'];
         var gamemodesCount = 0;
         var gameVariants = ['Regular', 'Two Balls'];
@@ -172,10 +169,6 @@
             alert("Please type a valid name"); //if the user types a name that is less than 2 characters or doesn't type anything it will reprompt them 
             name = prompt("What's your name?");
         }
-        //        var difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy'); //asks user for what difficulty they want 
-        //        while (difficulty !== 'easy' && difficulty !== 'hard') { // if the users response is not easy or hard, it will prompt them again 
-        //            difficulty = prompt("What difficulty do you want to play at?, Easy or Hard", 'easy');
-        //        }
 
         function mainloop() {
             if (mainMenu == false) {
@@ -222,7 +215,7 @@
             drawGround();
             startGameTimer();
             balls.forEach(Element => {
-                drawBall(Element.x, Element.y, Element.radius, 'white');
+                drawBall(Element.x, Element.y, Element.radius, 'white'); 
             });
 
             if (count <= 10) {
@@ -239,20 +232,19 @@
                 startingPos = false;
                 count = 160;
             }
-            if (singlePlayer == true && twoPlayer == false) {
+            if (singlePlayer == true && twoPlayer == false) { //only starts up if singleplayer is selected therefore bot will not be in other gamemodes
                 if (startingPos3 == true) {
                     startPos3();
                     startingPos3 = false;
                 }
+                drawBot();
                 if (count <= 10) {
                     botMove();
-
                 }
-                drawBot();
             }
             drawPlayer();
 
-            if (count <= 10) {
+            if (count <= 10) { //so players can't move before countdown
                 playerGravity();
                 playerMove();
                 playerJump();
@@ -276,16 +268,15 @@
         } //end of twoPlayerRun
 
         function menuButtons() {
-
             //button coordinates
-            let buttonXposLeft = 283.5;
-            let buttonXposRight = 508;
-            let buttonYposTop = 206.6;
-            let buttonYposBot = 254;
-            let button2YposTop = 282.6;
-            let button2YposBot = 330;
-            let button3YposTop = 358.6;
-            let button3YposBot = 406;
+            let buttonXposLeft = canvas.width / 2.82;
+            let buttonXposRight = canvas.width / 1.574;
+            let buttonYposTop = canvas.height / 2.78;
+            let buttonYposBot = canvas.height / 2.262;
+            let button2YposTop = canvas.height / 2.035;
+            let button2YposBot = canvas.height / 1.742;
+            let button3YposTop = canvas.height / 1.603;
+            let button3YposBot = canvas.height / 1.415;
 
             if (mouseX >= buttonXposLeft && mouseX <= buttonXposRight && mouseY >= buttonYposTop && mouseY <= buttonYposBot) { // button 1 coordinates
                 colorRect(buttonXposLeft, buttonYposTop, (buttonXposRight - buttonXposLeft), (buttonYposBot - buttonYposTop), 'rgb(0,0,0,0.2)'); //hover
@@ -307,29 +298,22 @@
             }
         } //end of menuButtons
 
-
         function singlePlayerSelection() {
 
-            //name box coordinates
-            let nameBoxLeft = 322;
-            let nameBoxRight = 453.5;
-            let nameBoxTop = 196.65;
-            let nameBoxBot = 240;
+            let difficultyLeft = canvas.width / 4.54;
+            let difficultyRight = canvas.width / 4.11;
+            let difficultyTop = canvas.height / 1.771;
+            let difficultyBot = canvas.height / 1.67;
 
-            let difficultyLeft = 177;
-            let difficultyRight = 195;
-            let difficultyTop = 323.5;
-            let difficultyBot = 345.5;
-
-            let gameplayLeft = 461.5;
-            let gameplayRight = 478.5;
-            let gameplayTop = 323.5;
-            let gameplayBot = 345.5;
+            let gameplayLeft = canvas.width / 1.735;
+            let gameplayRight = canvas.width / 1.668;
+            let gameplayTop = canvas.height / 1.771;
+            let gameplayBot = canvas.height / 1.67;
 
             drawImage(imageAssets.singlePlayerSelection, 0, 0, canvas.width, canvas.height);
             backButton();
 
-            drawText(370, 223, name, "14px Arial", "rgb(255,255,255,1)", "center");
+            drawText(canvas.width / 2.15, canvas.height / 2.59, name, "14px Arial", "rgb(255,255,255,1)", "center");
 
             if (mouseX >= difficultyLeft && mouseX <= difficultyRight && mouseY >= difficultyTop && mouseY <= difficultyBot) {
                 colorRect(difficultyLeft, difficultyTop, (difficultyRight - difficultyLeft), (difficultyBot - difficultyTop), 'rgb(255,255,255,0.2)');
@@ -337,7 +321,7 @@
                     if (buttonTest == false) { //fixes holding down mouse
                         buttonTest = true;
                         difficultyCount++;
-                        if (difficultyCount >= gameDifficulty.length) {
+                        if (difficultyCount >= gameDifficulty.length) { 
                             difficultyCount = 0;
                         }
                     }
@@ -346,9 +330,7 @@
                 }
             }
 
-            console.log(gameDifficulty[difficultyCount]);
-
-            drawText(225, 341, gameDifficulty[difficultyCount], "16px Arial", "rgb(0,0,0,1)", "center");
+            drawText(canvas.width / 3.54, canvas.height / 1.69, gameDifficulty[difficultyCount], "16px Arial", "rgb(0,0,0,1)", "center");
 
             if (mouseX >= gameplayLeft && mouseX <= gameplayRight && mouseY >= gameplayTop && mouseY <= gameplayBot) {
                 colorRect(gameplayLeft, gameplayTop, (gameplayRight - gameplayLeft), (gameplayBot - gameplayTop), 'rgb(255,255,255,0.2)');
@@ -365,20 +347,18 @@
                 }
             }
 
-            drawText(535, 340, gamemodes[gamemodesCount], "16px Arial", "rgb(0,0,0,1)", "center");
+            drawText(canvas.width / 1.49, canvas.height / 1.69, gamemodes[gamemodesCount], "16px Arial", "rgb(0,0,0,1)", "center");
 
         } //end of singlePlayerSelection
 
         function twoPlayerSelection() { // when twoPlayerSelect equals true run this
 
-            let squareLeft = 311.5;
-            let squareRight = 329;
-            let squareTop = 268.5;
-            let sqaureBot = 288.6;
-
-            let square2Top = 298;
-            let square2Bot = 317.6;
-
+            let squareLeft = canvas.width / 2.54;
+            let squareRight = canvas.width / 2.395;
+            let squareTop = canvas.height / 2.14;
+            let sqaureBot = canvas.height / 2;
+            let square2Top = canvas.height / 1.935;
+            let square2Bot = canvas.height / 1.815;
 
             drawImage(imageAssets.twoPlayerSelection, 0, 0, canvas.width, canvas.height);
             backButton();
@@ -398,8 +378,7 @@
                 }
             }
 
-            drawText(390, 283, gamemodes[gamemodesCount], "16px Arial", "rgb(0,0,0,1)", "center");
-
+            drawText(canvas.width / 2.05, canvas.height / 2.035, gamemodes[gamemodesCount], "16px Arial", "rgb(0,0,0,1)", "center");
 
             if (mouseX >= squareLeft && mouseX <= squareRight && mouseY >= square2Top && mouseY <= square2Bot) { //sqaure 2
                 colorRect(squareLeft, square2Top, (squareRight - squareLeft), (square2Bot - square2Top), 'rgb(255,255,255,0.2)');
@@ -416,7 +395,7 @@
                 }
             }
 
-            drawText(372, 314, gameVariants[gameVariantsCount], "16px Arial", "rgb(0,0,0,1)", "center");
+            drawText(canvas.width / 2.14, canvas.height / 1.84, gameVariants[gameVariantsCount], "16px Arial", "rgb(0,0,0,1)", "center");
         } //end of twoPlayerSelection
 
         function instructionSelection() {
@@ -425,12 +404,11 @@
         } //end of instructionSelection
 
         function backButton() {
-
             //back button coordinates
-            let backButtonLeft = 10.5;
-            let backButtonRight = 111;
-            let backButtonTop = 19.65625;
-            let backButtonBot = 54;
+            let backButtonLeft = canvas.width / (12 * 6);
+            let backButtonRight = canvas.width / 7.2;
+            let backButtonTop = canvas.height / (12 * 2.4);
+            let backButtonBot = canvas.height / 10.65;
 
             if (mouseX >= backButtonLeft && mouseX <= backButtonRight && mouseY >= backButtonTop && mouseY <= backButtonBot) {
                 colorRect(backButtonLeft, backButtonTop, (backButtonRight - backButtonLeft), (backButtonBot - backButtonTop), 'rgb(0,0,0,0.2)'); //hover
@@ -445,12 +423,11 @@
         } //end of backButton
 
         function startButton() {
-
             //start button coordinates
-            let startButtonLeft = 307.5;
-            let startButtonRight = 465.5;
-            let startButtonTop = 405.6;
-            let startButtonBot = 445.5;
+            let startButtonLeft = canvas.width / 2.6;
+            let startButtonRight = canvas.width / 1.72;
+            let startButtonTop = canvas.height / 1.417;
+            let startButtonBot = canvas.height / 1.291;
 
             if (mouseX >= startButtonLeft && mouseX <= startButtonRight && mouseY >= startButtonTop && mouseY <= startButtonBot) {
                 colorRect(startButtonLeft, startButtonTop, (startButtonRight - startButtonLeft), (startButtonBot - startButtonTop), 'rgb(0,0,0,0.2)'); //hover
@@ -494,11 +471,13 @@
         } //end of startPos2
 
         function startPos3() {
-            bot.botXpos = canvas.width / 1.2 - bot.BOT_SIZE / 2;
-            bot.botYpos = canvas.height / 1.21 - bot.BOT_SIZE / 2;
+            if (singlePlayer == true && twoPlayer == false) {
+                bot.botXpos = canvas.width / 1.2 - bot.BOT_SIZE / 2;
+                bot.botYpos = canvas.height / 1.21 - bot.BOT_SIZE / 2;
+            }
         } //end of startPos3
 
-        function loadImages() {
+        function loadImages() { //all of the images required in the game are stored here for conveince
             imgs = [];
             imgs.background = new Image();
             imgs.background.src = 'img/tempBack.png';
@@ -507,7 +486,7 @@
             imgs.singlePlayerSelection = new Image();
             imgs.singlePlayerSelection.src = 'img/singlePlayerMenu.png';
             imgs.twoPlayerSelection = new Image();
-            imgs.twoPlayerSelection.src = 'img/2playerMenu.png';
+            imgs.twoPlayerSelection.src = 'img/twoPlayerMenu.png';
             imgs.instructionsSelection = new Image();
             imgs.instructionsSelection.src = 'img/instructionMenu.png';
             imgs.player1 = new Image();
@@ -519,13 +498,13 @@
             return imgs;
         } // end of loadImages
 
-        function makeBall() {
+        function makeBall() { //properties of ball
             balls.push({
                 x: canvas.width / 2,
                 y: canvas.height / 2,
                 radius: 13,
                 status: 0,
-                ballXspeed: 3.5,
+                ballXspeed: Math.floor(Math.random() * (3 - -1.5)) - 1.5,
                 ballYspeed: 0,
                 ballGravity: 0.15,
                 ballRandomTest1: false,
@@ -545,6 +524,7 @@
                     if (Element.ballYspeed < 0 && Element.ballYspeed > -2.2) { //do this otherwise, ball never stops bouncing
                         Element.ballYspeed = 0;
                     }
+
                     if (Math.abs(Element.ballXspeed) > minBallXspeed) { //apply friction if ball speed is bigger than this
                         if (Element.ballXspeed > 0) {
                             Element.ballXspeed = Element.ballXspeed - friction;
@@ -576,6 +556,20 @@
                 }
                 if (Element.x < 0 + Element.radius && Element.ballXspeed < 0) { //left edge bounce
                     Element.ballXspeed *= -1;
+                }
+                if (gameVariantsCount == 1 && runOnce == true) { //pushes a new ball if two balls gamevariant is selected
+                    balls.push({ //ball 2
+                        x: canvas.width / 2,
+                        y: canvas.height / 2.3,
+                        radius: 13,
+                        status: 0,
+                        ballXspeed: Math.floor(Math.random() * (3 - -1.5)) - 1.5,
+                        ballYspeed: 0,
+                        ballGravity: 0.15,
+                        ballRandomTest1: false,
+                        ballRandomTest2: false
+                    });
+                    runOnce = false;
                 }
             });
         } //end of ballMove
@@ -647,10 +641,8 @@
                 } //end of player 2 collisions with ball
 
                 if (Element.x - Element.radius <= bot.botXpos + bot.BOT_SIZE && Element.x + Element.radius >= bot.botXpos && Element.y <= bot.botYpos + bot.BOT_SIZE && Element.y + Element.radius >= bot.botYpos) { //player 2 hitbox when it touches ball
-
                     Element.ballXspeed = -kickspeed;
                 }
-                //                Element.ballYspeed = gravity2 / 5 - 2; //how high the ball goes when player 2 hits it in the y direction   
             });
         } //end of ball Collisions
 
@@ -762,48 +754,66 @@
         } //end of playerCollisions
 
         function botMove() {
-//            if (difficultyCount[0]) {
-//                balls.forEach(Element => {
-//                    if (bot.botXpos > Element.x + Element.radius - 10) {
-//                        if (Math.random() < 0.6) {
-//                            bot.botXpos -= 3.5;
-//                        }
-//                    } else {
-//                        bot.botXpos += 3.5;
-//                    }
-//                });
-//            }
-
-            if (difficultyCount[1]) {
-                let container = [];
-                let count = 0;
-                balls.forEach(Element => {
-                    count++;
-                    let tempx = JSON.parse(JSON.stringify(Element.x));
-                    let tempy = JSON.parse(JSON.stringify(Element.y));
-                    let tempballYspeed = JSON.parse(JSON.stringify(Element.ballYspeed));
-                    let tempballXspeed = JSON.parse(JSON.stringify(Element.ballXspeed));
-
-                    while (tempy <= canvas.height / 6 * 4) {
-                        tempy += tempballYspeed;
-                        tempballYspeed += Element.ballGravity;
-                        tempx += 5;
-                    }
-                    container.push([tempx, count - 1]);
-                });
-                let container2 = JSON.parse(JSON.stringify(container));
-                container.forEach(Element => {
-                    Element[0] = Math.abs(Element[0] - bot.botXpos);
-                });
-                if (container.length >= 2) {
-                    container.sort(function(a, b) {
-                        return a[0] - b[0]
-                    });
+            if (singlePlayer == true && twoPlayer == false) {
+                if (player.playerXpos + player.PLAYER_SIZE >= bot.botXpos && player.playerXpos < bot.botXpos + bot.BOT_SIZE && player.playerYpos + player.PLAYER_SIZE >= bot.botYpos) { //hitboxes with bot and player
+                    player.playerXpos -= bot.botXspeed;
+                    bot.botXpos += player.playerXspeed;
                 }
-                if (container2[container[0][1]][0] <= bot.botXpos) {
-                    bot.botXpos -= bot.botXspeed;
-                } else if (container2[container[0][1]][0] >= bot.botXpos) {
-                    bot.botXpos += bot.botXspeed;
+                if (difficultyCount == 0) { //easy
+                    let container = [];
+                    let count = 0;
+                    balls.forEach(Element => {
+                        count++;
+                        let tempx = JSON.parse(JSON.stringify(Element.x)); //clones objects value to ensure there are no bugs with fundamentals
+                        let tempy = JSON.parse(JSON.stringify(Element.y));
+                        let tempballYspeed = JSON.parse(JSON.stringify(Element.ballYspeed));
+                        let tempballXspeed = JSON.parse(JSON.stringify(Element.ballXspeed));
+
+                        while (tempy <= canvas.height / 6 * 4) {
+                            tempy += tempballYspeed;
+                            tempballYspeed += Element.ballGravity;
+                            tempx += 5;
+                        }
+                        container.push([tempx, count - 1]);
+                    });
+                    let container2 = JSON.parse(JSON.stringify(container)); //second ball
+                    container.forEach(Element => {
+                        Element[0] = Math.abs(Element[0] - bot.botXpos);
+                    });
+                    if (container.length >= 2) {
+                        container.sort(function(a, b) { //sorts if there are two balls
+                            return a[0] - b[0]
+                        });
+                    }
+                    if (container2[container[0][1]][0] <= bot.botXpos) { //move after ball
+                        bot.botXpos -= bot.botXspeed;
+                    } else if (container2[container[0][1]][0] >= bot.botXpos) {
+                        bot.botXpos += bot.botXspeed;
+                    }
+                }
+
+                if (difficultyCount == 1) { //hard
+                    balls.forEach(Element => {
+                        if (Element.x <= canvas.width / 2) { //ball is in opponents half
+                            bot.botXpos += 3.5; //move back towards goal
+                            if (bot.botXpos >= canvas.width - 150) { //stay in goal
+                                bot.botXpos = canvas.width - 150;
+                            }
+                        }
+                        if (Element.x >= canvas.width / 2) { //if ball in our half
+                            bot.botXpos -= 3.5; //move out of goal
+                            if (bot.botXpos < 0) { //if past left 
+                                bot.botXpos = 0;
+                            }
+                        }
+
+                        if (Element.x >= bot.botXpos + bot.BOT_SIZE) { //if ball is on right side of player
+                            bot.botXpos += 7; // go after ball
+                            if (bot.botXpos >= canvas.width - 150) { //stop at goal
+                                bot.botXpos = canvas.width - 150;
+                            }
+                        }
+                    });
                 }
             }
         } //end of BotMove
@@ -876,14 +886,13 @@
         } //end of player2Jump
 
         function scoring() {
-
             //goals coordiantes
-            let goalLeft = 11.5;
-            let goalRight = 105.5;
-            let goal2Left = 692.5;
-            let goal2Right = 785.5;
-            let goalTop = 347.6;
-            let goalBot = 500;
+            let goalLeft = canvas.width / (80 * 10);
+            let goalRight = canvas.width / 7.54;
+            let goal2Left = canvas.width / 1.156;
+            let goal2Right = canvas.width / 1;
+            let goalTop = canvas.height / 1.65;
+            let goalBot = canvas.height / 1.159274194;
 
             balls.forEach(Element => {
                 if (Element.x > goal2Left && Element.y <= goalTop && Element.ballYspeed > 0 && Element.y >= goalTop - Element.radius) { //top bounce of goal right
@@ -894,67 +903,84 @@
                     Element.ballYspeed += 1;
                 }
 
-                if (Element.x > goal2Left && Element.y >= goalTop && Element.ballYspeed < 0 && Element.y <= goalTop + Element.radius) { //top bounce of goal right
+                if (Element.x > goal2Left && Element.y >= goalTop && Element.ballYspeed < 0 && Element.y <= goalTop + Element.radius) { //underside bounce of goal right
                     Element.ballYspeed *= -1;
-                } else if (Element.x < goalRight && Element.y >= goalTop && Element.ballYspeed < 0 && Element.y <= goalTop + Element.radius) { //top bounce of goal right
+                } else if (Element.x < goalRight && Element.y >= goalTop && Element.ballYspeed < 0 && Element.y <= goalTop + Element.radius) { //underside bounce of goal right
                     Element.ballYspeed *= -1;
                 }
 
                 if (Element.x < goalRight && Element.y > goalTop && Element.y < goalBot) { //goal left
-                    if (goalScored2 == false) {
+                    if (goalScored2 == false && gameFinished == false) {
                         score2++;
                         goalScored2 = true;
                     }
-                    startRestartCount = true;
+                    if (gamemodesCount == 0) {
+                        startRestartCount = true;
+                    }
                 }
                 if (Element.x > goal2Left && Element.y > goalTop && Element.y < goalBot) { //goal right
-                    if (goalScored == false) {
+                    if (goalScored == false && gameFinished == false) {
                         score1++;
                         goalScored = true;
                     }
-                    startRestartCount = true;
+                    if (gamemodesCount == 0) {
+                        startRestartCount = true;
+                    }
                 }
             });
             if (startRestartCount == true) {
                 resetCount--;
             }
-            if (resetCount < 50) {
-                drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                drawText(canvas.width / 2, canvas.height / 3.5, "Goal!", "30px Arial", "rgb(0,0,0,1)", "center");
+            if (resetCount < 50 && gamemodesCount == 0) {
+                if (score1 < 7) {
+                    if (score2 < 7) {
+                        drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
+                        drawText(canvas.width / 2, canvas.height / 3.5, "Goal!", "30px Arial", "rgb(0,0,0,1)", "center");
+                    }
+                }
             }
-            if (resetCount <= 0) {
-                startRestartCount = false;
-                resetGame();
-                goalScored = false;
-                goalScored2 = false;
+            if (resetCount <= 0 && gamemodesCount == 0) {
+                if (score1 < 7) {
+                    if (score2 < 7) {
+                        startRestartCount = false;
+                        resetGame();
+                        goalScored = false;
+                        goalScored2 = false;
+                    }
+                }
             }
         } //end of scoring
 
         function resetGame() { //resets game after goal has been scored
-            balls.forEach(Element => {
+            balls.forEach(Element => { //balls
                 Element.x = canvas.width / 2;
                 Element.y = canvas.height / 2;
                 Element.ballXspeed = Math.floor(Math.random() * (3 - -1.5)) - 1.5;
                 Element.ballYspeed = 0;
-
             });
+
             resetCount = 50;
             startPos1();
             startPos2();
-            startPos3();
+            if (singlePlayer == true && twoPlayer == false) {
+                startPos3();
+            }
             count = 160;
             startGameTimer();
         } //end of resetGame
 
         function gameEnd() {
-            if (score1 == 7) { //first to 7 wins
+            if (gamemodesCount == 0 && score1 == 7) { //first to 7 wins
                 drawText(canvas.width / 2, canvas.height / 3.5, "Player1 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
                 endGameCount--;
+                gameOver = true;
             }
-            if (score2 == 7) {
+            if (gamemodesCount == 0 && score2 == 7) {
                 drawText(canvas.width / 2, canvas.height / 3.5, "Player2 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
                 endGameCount--;
-            } else if (goldenGoal == true) { //golden goal
+                gameOver = true;
+            }
+            if (gamemodesCount == 1) { //golden goal
                 if (score1 == 1) {
                     drawText(canvas.width / 2, canvas.height / 3.5, "Player1 Won!", "30px Arial", "rgb(0,0,0,1)", "center");
                     endGameCount--;
@@ -967,7 +993,7 @@
             if (endGameCount <= 0) {
                 gameFinished = true;
             }
-            if (gameFinished == true) {
+            if (gameFinished == true) { //ends game variables
                 score1 = 0;
                 score2 = 0;
                 singlePlayer = false;
@@ -976,72 +1002,34 @@
                 singlePlayerSelect = false;
                 twoPlayerSelect = false;
                 startGame = false;
+                instructionsSelect = false;
                 mainMenu = true;
                 gameFinished = true;
-
-                gravity = 0.1;
-                gravity2 = 0.1;
-                bounce = 0.6;
-                friction = 0.1;
-                jumpForce = -30;
-                jumping = false;
-                jumping2 = false;
-                kickspeed = 4.5;
-                normalSpeed = 3.5;
-                stacking = false;
-                stacking2 = false;
-                pushingRight = false;
-                pushingLeft = false
-                pushing2Left = false;
-                pushing2Right = false;
-                stopped = false
-                p1LW = false;
-                p1RW = false;
-                p2LW = false;
-                p2RW = false;
-                temp1 = false;
-                temp2 = false;
-                minBallXspeed = 1.5;
-
-                //game variables
-                mouseX, mouseY;
-                mouseDown = 0;
                 startingPos = true;
                 startingPos2 = true;
                 startingPos3 = true;
-                gameStart = false;
-                singlePlayer = false;
-                twoPlayer = false;
-                gameFinished = false;
-                startGame = false;
                 startOfGame = true;
-                count = -1;
-                score1 = 0;
-                score2 = 0;
-                leftGoalScored = false;
-                rightGoalScored = false;
                 goalScored = false;
                 goalScored2 = false;
                 startRestartCount = false;
+                runOnce = true;
                 reset = false;
+                gameOver = false;
                 resetCount = 50;
                 endGameCount = 110;
-                balls = [];
-                goldenGoal = false;
-                twoBalls = false;
-                firstToSeven = true;
-                regular = true;
-                makeBall();
+                if (gameVariantsCount == 1) {
+                    balls.pop();
+                }
+                gamemodesCount = 0;
+                gameVariantsCount = 0;
+                difficultyCount = 0;
 
-                // menu buttons
-                mainMenu = true;
-                singlePlayerSelect = false;
-                twoPlayerSelect = false;
-                instructionsSelect = false;
-                backButtonClicked = false;
-
-
-
+                balls.forEach(Element => {
+                    Element.x = canvas.width / 2;
+                    Element.y = canvas.height / 2;
+                    Element.ballXspeed = Math.floor(Math.random() * (3 - -1.5)) - 1.5;
+                    Element.ballYspeed = 0;
+                });
             }
         } //end of gameEnd
 
@@ -1052,24 +1040,51 @@
                     drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
                     drawText(canvas.width / 2, canvas.height / 3, "3", "30px Arial", "rgb(0,0,0,1)", "center");
                     drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                    if (startOfGame == true && firstToSeven == true) {
+                    if (startOfGame == true && gamemodesCount == 0) {
                         drawText(canvas.width / 2, canvas.height - 30, "First to seven wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                        if (gameVariantsCount == 1) {
+                            drawText(canvas.width / 2, canvas.height - 200, "Balls do not effect each other!", "25px Arial", "rgb(0,0,0,1)", "center");
+                        }
+                    }
+                    if (gamemodesCount == 1) {
+                        drawText(canvas.width / 2, canvas.height - 30, "First to score wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                        if (gameVariantsCount == 1) {
+                            drawText(canvas.width / 2, canvas.height - 200, "Balls do not effect each other!", "25px Arial", "rgb(0,0,0,1)", "center");
+                        }
                     }
                 }
                 if (count <= 110 && count >= 60) {
                     drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
                     drawText(canvas.width / 2, canvas.height / 3, "2", "30px Arial", "rgb(0,0,0,1)", "center");
                     drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                    if (startOfGame == true && firstToSeven == true) {
+                    if (startOfGame == true && gamemodesCount == 0) {
                         drawText(canvas.width / 2, canvas.height - 30, "First to seven wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                        if (gameVariantsCount == 1) {
+                            drawText(canvas.width / 2, canvas.height - 200, "Balls do not effect each other!", "25px Arial", "rgb(0,0,0,1)", "center");
+                        }
+                    }
+                    if (gamemodesCount == 1) {
+                        drawText(canvas.width / 2, canvas.height - 30, "First to score wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                        if (gameVariantsCount == 1) {
+                            drawText(canvas.width / 2, canvas.height - 200, "Balls do not effect each other!", "25px Arial", "rgb(0,0,0,1)", "center");
+                        }
                     }
                 }
                 if (count <= 60 && count >= 10) {
                     drawImage(imageAssets.background, 0, 0, canvas.width, canvas.height); //bg
                     drawText(canvas.width / 2, canvas.height / 3, "1", "30px Arial", "rgb(0,0,0,1)", "center");
                     drawText(canvas.width / 2, canvas.height / 5, score1 + " - " + score2, "30px Arial", "rgb(0,0,0,1)", "center");
-                    if (startOfGame == true && firstToSeven == true) {
+                    if (startOfGame == true && gamemodesCount == 0) {
                         drawText(canvas.width / 2, canvas.height - 30, "First to seven wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                        if (gameVariantsCount == 1) {
+                            drawText(canvas.width / 2, canvas.height - 200, "Balls do not effect each other!", "25px Arial", "rgb(0,0,0,1)", "center");
+                        }
+                    }
+                    if (gamemodesCount == 1) {
+                        drawText(canvas.width / 2, canvas.height - 30, "First to score wins!", "30px Arial", "rgb(0,0,0,1)", "center");
+                        if (gameVariantsCount == 1) {
+                            drawText(canvas.width / 2, canvas.height - 200, "Balls do not effect each other!", "25px Arial", "rgb(0,0,0,1)", "center");
+                        }
                     }
                 }
                 if (count <= 10 && count >= 0) {
